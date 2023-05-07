@@ -4,8 +4,43 @@
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Comme:wght@100;300;400;600;700&display=swap"
+			rel="stylesheet"
+		/>
 		%sveltekit.head%
 	</head>
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+			background-color: var(--shade);
+			font-family: 'Comme', sans-serif;
+		}
+		* {
+			-moz-box-sizing: border-box;
+			-webkit-box-sizing: border-box;
+			-ms-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+
+		:root {
+			--background: #ededed;
+			--background-light: #f7f7f7;
+			--background-dark: #d1d1d1;
+			--light-accent: #cea467;
+			--dark-accent: #78767a;
+			--shade: #433241;
+			--primary: #838c95;
+			--info: #433241;
+			--success: #5da565;
+			--warning: #da942d;
+			--danger: #f44336;
+		}
+	</style>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
