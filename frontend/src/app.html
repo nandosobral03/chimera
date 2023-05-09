@@ -6,10 +6,13 @@
 		<meta name="viewport" content="width=device-width" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
+
 		<link
 			href="https://fonts.googleapis.com/css2?family=Comme:wght@100;300;400;600;700&display=swap"
 			rel="stylesheet"
 		/>
+		<title>Chimera</title>
 		%sveltekit.head%
 	</head>
 	<style>
@@ -39,7 +42,52 @@
 			--success: #5da565;
 			--warning: #da942d;
 			--danger: #f44336;
+
+			--1: #577590;
+			--2: #4d908e;
+			--3: #43aa8b;
+			--4: #90be6d;
+			--5: #f9c74f;
+			--6: #f8961e;
+			--7: #f3722c;
+			--8: #f94144;	
 		}
+
+		.cell-1{
+			color: var(--1);
+		}
+
+		.cell-2{
+			color: var(--2);
+		}
+
+		.cell-3{
+			color: var(--3);
+		}
+
+		.cell-4{
+			color: var(--4);
+		}
+
+		.cell-5{
+			color: var(--5);
+		}
+
+		.cell-6{
+			color: var(--6);
+		}
+
+		.cell-7{
+			color: var(--7);
+		}
+
+		.cell-8{
+			color: var(--8);
+		}
+
+		
+
+
 	</style>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
