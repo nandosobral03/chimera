@@ -1,0 +1,7 @@
+-- Your SQL goes here
+CREATE TABLE games (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
+  board VARCHAR(511) NOT NULL,
+  day VARCHAR(255) NOT NULL,
+  initial_position VARCHAR(511) NOT NULL
+)

@@ -1,0 +1,2 @@
+diesel setup --database-url "C:\Users\nando\OneDrive\Escritorio\database.db"
+diesel migration run --database-url "C:\Users\nando\OneDrive\Escritorio\database.db"
