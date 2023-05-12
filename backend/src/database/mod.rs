@@ -3,7 +3,6 @@ use diesel::prelude::*;
 use dotenvy::dotenv;
 use std::env;
 
-pub mod models;
 
 pub fn establish_connection() -> SqliteConnection {
     dotenv().expect("Failed to read .env file");

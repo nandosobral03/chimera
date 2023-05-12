@@ -1,5 +1,3 @@
-pub mod user;
-
 use diesel::{prelude::*};
 use serde::{Deserialize, Serialize};
 

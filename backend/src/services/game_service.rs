@@ -1,12 +1,11 @@
-use crate::database::{establish_connection, models::*};
 use diesel::prelude::*;
-use crate::error_handler::MyError;
+use crate::{error_handler::MyError,database::establish_connection, models::game::Game};
 
 pub fn get_game_by_day(day_to_find: &str) -> Result<Game, MyError> {
     validate_day(day_to_find)?;
     use crate::schema::games::dsl::*;
     let connection = &mut establish_connection();
-    let results = games
+    let results: Result<Game, _> = games
         .filter(day.eq(day_to_find))
         .first::<Game>(connection);
     match results {
