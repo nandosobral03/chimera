@@ -17,6 +17,8 @@ async fn main() {
     let app = Router::new().route("/", get(|| async { "Hello, World!" }));
     // make a route with a query parameter
     let app = app.route("/game", get(routes::game_routes::get_game_by_day_api));
+    let app = app.route("/game/current", get(routes::game_routes::get_curreny_day_api));
+    let app = app.route("/game", post(routes::game_routes::post_game_result_auth));
 
     let app = app.route("/signup", post(routes::user_routes::sign_up_api));
     let app = app.route("/login", post(routes::user_routes::login_api));

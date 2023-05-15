@@ -27,3 +27,20 @@ pub struct UserRequest {
     pub email: String,
     pub password: String,
 }
+
+#[derive(Deserialize)]
+pub enum UserType{
+    Player,
+    Guest
+}
+
+
+
+#[derive(Deserialize,Queryable)]
+pub struct DayStat{
+    pub day: String,
+    pub total_games: i32,
+    pub total_wins: i32,
+    pub aggregated_board_stats: String,
+}
+

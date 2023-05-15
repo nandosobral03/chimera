@@ -17,6 +17,10 @@ pub fn get_game_by_day(day_to_find: &str) -> Result<Game, MyError> {
     }
 }
 
+
+
+
+
 fn validate_day(day_to_find: &str) -> Result<(), MyError> {
     let parts = day_to_find.split("/").collect::<Vec<&str>>();
     if parts.len() != 3 {
@@ -58,3 +62,5 @@ fn validate_day(day_to_find: &str) -> Result<(), MyError> {
 
     Ok(())
 }
+
+
