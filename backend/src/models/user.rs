@@ -14,7 +14,7 @@ pub struct User {
 
 
 #[derive(Insertable, Deserialize)]
-#[table_name = "users"]
+#[diesel(table_name = users)]
 pub struct UserCreate {
     pub email: String,
     pub password_hash: String,
@@ -34,13 +34,9 @@ pub enum UserType{
     Guest
 }
 
-
-
-#[derive(Deserialize,Queryable)]
-pub struct DayStat{
-    pub day: String,
+#[derive(Deserialize, Queryable)]
+pub struct UserStats{
+    pub user_id: i32,
     pub total_games: i32,
-    pub total_wins: i32,
-    pub aggregated_board_stats: String,
+    pub total_wins: i32,    
 }
-

@@ -19,7 +19,7 @@ pub struct GameResult{
 }
 
 #[derive(Deserialize, Insertable)]
-#[table_name = "user_day_stats"]
+#[diesel(table_name = user_day_stats)]
 pub struct UserDayStats {
     pub user_id: i32,
     pub day: String,
@@ -27,3 +27,13 @@ pub struct UserDayStats {
     pub board: String,
     pub last_move: Option<String>,
 }
+
+
+#[derive(Deserialize,Queryable)]
+pub struct DayStat{
+    pub day: String,
+    pub total_games: i32,
+    pub total_wins: i32,
+    pub aggregated_board_stats: String,
+}
+

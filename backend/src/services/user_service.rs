@@ -1,4 +1,4 @@
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, Connection};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use dotenvy::dotenv;
 use rand::RngCore;
 
@@ -6,14 +6,16 @@ use crate::{
     error_handler::MyError,
     models::{
         token::Token,
-        user::{User, UserCreate, UserRequest, DayStat}, game::{GameResult},
-    }
+        user::{User, UserCreate, UserRequest, UserStats}, game::{GameResult},
+    }, services::game_service::record_stats
 };
 
 use hmac::{Hmac, Mac};
 use jwt::SignWithKey;
 use sha2::Sha256;
 use std::{collections::BTreeMap, env};
+
+
 
 pub fn sign_up(user: UserRequest) -> Result<Token, MyError> {
     use crate::schema::users;
@@ -153,6 +155,7 @@ pub async fn save_won_game(
             .execute(&mut conn)
         {
             Ok(_) => {
+                record_user_stats(userid, true)?;
                 record_stats(result_day, true, None)?;
                 return Ok(());
             }
@@ -198,7 +201,10 @@ pub async fn save_lost_game(
             ))
             .execute(&mut conn)
         {
-            Ok(_) => record_stats(result_day, false, result.exploded),
+            Ok(_) => {
+                record_user_stats(userid, false)?;
+                record_stats(result_day, false, result.exploded)
+            },
             Err(err) => {
                 return Err(MyError {
                     message: err.to_string(),
@@ -209,20 +215,22 @@ pub async fn save_lost_game(
     }
 }
 
-fn record_stats(result_day: String, won: bool, last_move_played: Option<String>) -> Result<(), MyError> {
+
+fn record_user_stats(userid: i32, won:bool) -> Result<(), MyError>{
+    use crate::schema::user_stats::dsl::*;
+
     let mut conn = crate::database::establish_connection();
-    let exists = diesel::select(diesel::dsl::exists(
-        crate::schema::day_stats::dsl::day_stats.filter(crate::schema::day_stats::dsl::day.eq(&result_day))
+    let exists = diesel::select(diesel::dsl::exists( 
+        user_stats.filter(user_id.eq(&userid))
     )).get_result::<bool>(&mut conn).unwrap();
 
 
 
-    let insert_result = diesel::insert_into(crate::schema::day_stats::table)
+    let insert_result = diesel::insert_into(crate::schema::user_stats::table)
     .values((
-        crate::schema::day_stats::dsl::day.eq(&result_day),
-        crate::schema::day_stats::dsl::total_games.eq(1),
-        crate::schema::day_stats::dsl::total_wins.eq(if won {0} else {0}),
-        crate::schema::day_stats::dsl::aggregated_board_stats.eq("{}"),
+        user_id.eq(&userid),
+        total_games.eq(0),
+        total_wins.eq(0),
     ))
     .execute(&mut conn);
 
@@ -232,69 +240,29 @@ fn record_stats(result_day: String, won: bool, last_move_played: Option<String>)
             code: 400,
         });
     }
-    
 
-
+    let mut stats = user_stats
+        .filter(user_id.eq(&userid))
+        .first::<UserStats>(&mut conn)
+        .unwrap();
+    stats.total_games += 1;
     if won {
-        match conn.transaction::<_, diesel::result::Error, _>(|conn| {
-            use crate::schema::day_stats::dsl::*;
-            let existing_day_stat: DayStat = day_stats.first(conn)?;
-            let updated_games_won = existing_day_stat.total_wins + 1;
-            let updated_total_games = existing_day_stat.total_games + 1;
-            diesel::update(day_stats)
-                .filter(day.eq(&result_day))
-                .set((
-                    total_wins.eq(updated_games_won),
-                    total_games.eq(updated_total_games),
-                ))
-                .execute(conn)
-        }) {
-            Ok(_) => Ok(()),
-            Err(err) => Err(MyError {
-                message: err.to_string(),
-                code: 400,
-            }),
-        }
-    } else{
-        match last_move_played {
-            None => {
-                return Err(MyError {
-                    message: String::from("Last move played is required in losing games"),
-                    code: 400,
-                })
-            },
-            Some(val) =>{ 
-                match conn.transaction::<_, diesel::result::Error, _>(|conn| {
-                    use crate::schema::day_stats::dsl::*;
-                    let existing_day_stat: DayStat = day_stats.first(conn)?;
-                    let updated_total_games = existing_day_stat.total_games + 1;
-                    let current_day_stat = day_stats.filter(day.eq(&result_day)).first::<DayStat>(conn)?;
-                    let mut board_stats: BTreeMap<String, i32> = serde_json::from_str(&current_day_stat.aggregated_board_stats).unwrap_or(BTreeMap::new());
-                    if board_stats.contains_key(&val) {
-                        let updated_board_stat = board_stats.get(&val).unwrap() + 1;
-                        board_stats.insert(val, updated_board_stat);
-                    }
-                    
-                    diesel::update(day_stats)
-                        .filter(day.eq(&result_day))
-                        .set((
-                            total_games.eq(updated_total_games),
-                            aggregated_board_stats.eq(serde_json::to_string(&board_stats).unwrap())
-                        ))
-                        .execute(conn)
-                }) {
-                    Ok(_) => Ok(()),
-                    Err(err) => Err(MyError {
-                        message: err.to_string(),
-                        code: 400,
-                    }),
-                }
-            }
-        }
-
-        
+        stats.total_wins += 1;
     }
 
-
-   
+    match diesel::update(user_stats)
+        .set((
+            total_games.eq(stats.total_games),
+            total_wins.eq(stats.total_wins),
+        ))
+        .execute(&mut conn)
+    {
+        Ok(_) => Ok(()),
+        Err(err) => {
+            return Err(MyError {
+                message: err.to_string(),
+                code: 400,
+            })
+        }
+    }
 }
