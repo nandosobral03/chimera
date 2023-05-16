@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use diesel::prelude::*;
-use crate::{error_handler::MyError,database::establish_connection, models::{game::{Game, DayStat}}};
+use crate::{error_handler::MyError,database::establish_connection, models::{game::{Game, DayStat, GameResult}}};
 
 pub fn get_game_by_day(day_to_find: &str) -> Result<Game, MyError> {
     validate_day(day_to_find)?;
@@ -131,6 +131,8 @@ pub fn record_stats(result_day: String, won: bool, last_move_played: Option<Stri
                     if board_stats.contains_key(&val) {
                         let updated_board_stat = board_stats.get(&val).unwrap() + 1;
                         board_stats.insert(val, updated_board_stat);
+                    }else{
+                        board_stats.insert(val, 1);
                     }
                     
                     diesel::update(day_stats)
@@ -151,4 +153,71 @@ pub fn record_stats(result_day: String, won: bool, last_move_played: Option<Stri
         }
     }
    
+}
+
+
+pub fn get_day_stats(day_to_find: &str) -> Result<DayStat, MyError> {
+    validate_day(day_to_find)?;
+    use crate::schema::day_stats::dsl::*;
+    let connection = &mut establish_connection();
+    let results: Result<DayStat, _> = day_stats
+        .filter(day.eq(day_to_find))
+        .first::<DayStat>(connection);
+    match results {
+        Ok(day_stat) => Ok(day_stat),
+        Err(_) => Err(MyError{
+            message: String::from("Day stat not found"),
+            code: 404
+        })
+    }
+}
+
+
+pub fn validate_game_result(result: &GameResult)-> Result<(), MyError>{
+    if let Some(exploded) = &result.exploded {
+        validate_cell(exploded)?;
+    }
+
+    let uncovered = 
+        result.uncovered.split(",").collect::<Vec<&str>>()
+        .iter()
+        .map(|&x | validate_cell(x))
+        .collect::<Result<Vec<()>, MyError>>();
+    if uncovered.is_err() {
+        return Err(MyError{
+            message: String::from("Invalid cell. Please use the format x:y"),
+            code: 400
+        })
+    }
+
+
+    Ok(())
+}
+
+fn validate_cell(cell: &str) -> Result<(), MyError> {
+    let parts = cell.split(":").collect::<Vec<&str>>();
+    if parts.len() != 2 {
+        return Err(MyError{
+            message: String::from("Invalid cell. Please use the format x:y"),
+            code: 400
+        })
+    }
+
+    let x = parts[0].parse::<i32>().unwrap_or(0);
+    let y = parts[1].parse::<i32>().unwrap_or(0);
+
+    if x < 0 || x > 15 {
+        return Err(MyError{
+            message: String::from("Invalid cell value. Please use a value between 0 and 15 for x"),
+            code: 400
+        })
+    }
+
+    if y < 0 || y > 29 {
+        return Err(MyError{
+            message: String::from("Invalid cell value. Please use a value between 0 and 29 for y"),
+            code: 400
+        })
+    }
+    Ok(())
 }

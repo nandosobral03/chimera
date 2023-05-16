@@ -2,9 +2,9 @@ use crate::{
     error_handler::MyError,
     models::{
         game::GameResult,
-        guest::{self, Guest},
+        guest::{ Guest, GuestDayStats},
     },
-    services::game_service::record_stats,
+    services::game_service::{record_stats, validate_game_result},
 };
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 
@@ -13,10 +13,10 @@ pub async fn save_won_game_guest(
     param_guest_id: String,
     result_day: String,
 ) -> Result<(), MyError> {
+    validate_game_result(&result)?;
     use crate::schema::guest_day_stats::dsl::*;
     use crate::schema::guests::dsl::*;
     let mut conn = crate::database::establish_connection();
-
     let guest_exists = guests
         .filter(id.eq(&param_guest_id))
         .count()
@@ -77,6 +77,8 @@ pub async fn save_lost_game_guest(
     param_guest_id: String,
     result_day: String,
 ) -> Result<(), MyError> {
+    validate_game_result(&result)?;
+
     use crate::schema::guest_day_stats::dsl::*;
     use crate::schema::guests::dsl::*;
     let mut conn = crate::database::establish_connection();
@@ -132,7 +134,7 @@ pub async fn save_lost_game_guest(
     }
 
     record_guest_stats(param_guest_id, false)?;
-    record_stats(result_day, true, result.exploded)?;
+    record_stats(result_day, false, result.exploded)?;
     Ok(())
 }
 
@@ -172,3 +174,51 @@ fn record_guest_stats(guest_id: String, won: bool) -> Result<(), MyError> {
         }),
     }
 }
+
+
+pub fn get_guest_stats(param_guest_id: String) -> Result<Guest, MyError> {
+    use crate::schema::guests::dsl::*;
+    let mut conn = crate::database::establish_connection();
+
+    let guest_result = guests.filter(id.eq(&param_guest_id)).first::<Guest>(&mut conn);
+
+    match guest_result {
+        Ok(guest) => Ok(guest),
+        Err(_) => Err(MyError {
+            message: String::from("Error getting guest stats"),
+            code: 400,
+        }),
+    }
+}
+
+
+
+pub fn get_guest_day_stats(param_guest_id: String, param_day: String) -> Result<GuestDayStats, MyError> {
+    use crate::schema::guests::dsl::*;
+    use crate::schema::guest_day_stats::dsl::*;
+    let mut conn = crate::database::establish_connection();
+
+    let guest_result = guests.filter(id.eq(&param_guest_id)).first::<Guest>(&mut conn);
+
+    match guest_result {
+        Ok(_guest) => {
+            let guest_day_result = guest_day_stats
+                .filter(guest_id.eq(&param_guest_id))
+                .filter(day.eq(&param_day))
+                .first::<GuestDayStats>(&mut conn);
+            match guest_day_result {
+                Ok(guest_day) => Ok(guest_day),
+                Err(_) => Err(MyError {
+                    message: String::from("Error getting guest day stats"),
+                    code: 400,
+                }),
+            }
+        }
+        Err(_) => Err(MyError {
+            message: String::from("Guest not found"),
+            code: 404,
+        }),
+    }
+}
+
+

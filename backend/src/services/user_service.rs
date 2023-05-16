@@ -6,8 +6,8 @@ use crate::{
     error_handler::MyError,
     models::{
         token::Token,
-        user::{User, UserCreate, UserRequest, UserStats}, game::{GameResult},
-    }, services::game_service::record_stats
+        user::{User, UserCreate, UserRequest, UserStats}, game::{GameResult, UserDayStats},
+    }, services::game_service::{record_stats, validate_game_result}
 };
 
 use hmac::{Hmac, Mac};
@@ -128,7 +128,7 @@ pub async fn save_won_game(
     result_day: String,
 ) -> Result<(), MyError> {
     use crate::schema::user_day_stats::dsl::*;
-
+    validate_game_result(&result)?;
     let mut conn = crate::database::establish_connection();
 
     let user_day_count = user_day_stats
@@ -175,7 +175,7 @@ pub async fn save_lost_game(
     result_day: String,
 ) -> Result<(), MyError> {
     use crate::schema::user_day_stats::dsl::*;
-
+    validate_game_result(&result)?;
     let mut conn = crate::database::establish_connection();
 
     let user_day_count = user_day_stats
@@ -266,3 +266,26 @@ fn record_user_stats(userid: i32, won:bool) -> Result<(), MyError>{
         }
     }
 }
+
+
+pub fn get_user_stats(userid: i32) -> Result<UserStats, MyError> {
+    use crate::schema::user_stats::dsl::*;
+    let mut conn = crate::database::establish_connection();
+    let stats = user_stats
+        .filter(user_id.eq(&userid))
+        .first::<UserStats>(&mut conn)
+        .unwrap();
+    Ok(stats)
+}
+
+pub fn get_user_day_stats(userid: i32, day_param: String) -> Result<UserDayStats, MyError> {
+    use crate::schema::user_day_stats::dsl::*;
+    let mut conn = crate::database::establish_connection();
+    let stats = user_day_stats
+        .filter(user_id.eq(&userid))
+        .filter(day.eq(&day_param))
+        .first::<UserDayStats>(&mut conn)
+        .unwrap();
+    Ok(stats)
+}
+

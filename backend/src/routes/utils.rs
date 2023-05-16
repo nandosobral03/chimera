@@ -1,9 +1,11 @@
 use std::env;
 
+use axum::{response::IntoResponse, Json};
 use dotenvy::dotenv;
 use hmac::{Hmac, Mac};
-use hyper::HeaderMap;
+use hyper::{HeaderMap, StatusCode};
 use jwt::{VerifyWithKey};
+use serde_json::json;
 use sha2::Sha256;
 use std::{collections::BTreeMap};
 
@@ -51,5 +53,16 @@ pub fn decode_token(headers: HeaderMap) -> Result<DecodedToken, MyError>{
                 code: 401
             })
         },
+    }
+}
+
+pub fn handle_error(err: MyError) -> impl IntoResponse {
+    match err.code {
+        400 => (StatusCode::BAD_REQUEST, Json(json!({"error": err.message}))),
+        401 => (StatusCode::UNAUTHORIZED, Json(json!({"error": err.message}))),
+        403 => (StatusCode::FORBIDDEN, Json(json!({"error": err.message}))),
+        404 => (StatusCode::NOT_FOUND, Json(json!({"error": err.message}))),
+        409 => (StatusCode::CONFLICT, Json(json!({"error": err.message}))),
+        _ => (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"error": err.message})))
     }
 }

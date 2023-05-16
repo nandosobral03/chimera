@@ -1,6 +1,6 @@
 use crate::schema::users;
 use diesel::{Insertable, Queryable};
-use serde::{Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Deserialize)]
 pub struct User {
@@ -28,15 +28,10 @@ pub struct UserRequest {
     pub password: String,
 }
 
-#[derive(Deserialize)]
-pub enum UserType{
-    Player,
-    Guest
-}
-
-#[derive(Deserialize, Queryable)]
+#[derive(Deserialize, Queryable, Serialize)]
 pub struct UserStats{
     pub user_id: i32,
     pub total_games: i32,
     pub total_wins: i32,    
 }
+
