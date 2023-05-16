@@ -1,5 +1,7 @@
-export const load = () => {
-
+import axios from 'axios';    
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
+export const load = async () => {
+    const dayData = (await axios.get(`${PUBLIC_BACKEND_URL}/game/current`)).data;
     const  board =  [
         [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
         [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
@@ -19,13 +21,14 @@ export const load = () => {
         [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
     ]
 
-    for(let i = 0; i < 90; i++){
-        let x = Math.floor(Math.random() * 15)
-        let y = Math.floor(Math.random() * 30)
-        board[x][y] = true
+    for(let mine of dayData.board.split(",")) {
+        let [x, y] = mine.split(':')
+        board[parseInt(x)][parseInt(y)] = true
     }
 
     return {
-        board
+        board,
+        initialPosition: dayData.initial_position,
+        mineCount: dayData.board.split(",").length
     }
 }

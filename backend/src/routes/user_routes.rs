@@ -65,3 +65,20 @@ pub async fn get_user_day_stats_api(
         Err(err) =>  handle_error(err).into_response()
     }  
 }
+
+pub async fn get_user_current_day_stats_api(
+    headers: HeaderMap,
+) -> impl IntoResponse {
+    let day = chrono::Local::now().format("%d/%m/%Y").to_string();
+    match decode_token(headers){
+        Ok(token) => {
+           match user_service::get_user_day_stats(token.user, day){
+            Ok(stats) =>{
+                 Json(json!(stats)).into_response()
+            }
+            Err(err) => handle_error(err).into_response()
+           }
+        },
+        Err(err) =>  handle_error(err).into_response()
+    }  
+}

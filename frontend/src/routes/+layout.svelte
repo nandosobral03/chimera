@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { browser } from '$app/environment'; 
+	import { onMount } from "svelte";
 	import type {  LayoutData } from "./$types";
 
     export let data: LayoutData
-    console.log(data)
 
 	const tabs: {
 		name: string;
@@ -21,6 +22,11 @@
 			path: '/stats'
 		}
 	];
+
+
+
+
+
 </script>
 
 <div class="container">
