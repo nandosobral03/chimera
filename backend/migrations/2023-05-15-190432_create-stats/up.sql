@@ -19,18 +19,19 @@ CREATE TABLE user_day_stats (
 
 
 CREATE TABLE guest_day_stats (
-    guest_id VARCHAR(255),
+    guest_id VARCHAR(255) NOT NULL REFERENCES guests(id),
     day VARCHAR(255) NOT NULL REFERENCES games(day),
     status VARCHAR(255) NOT NULL, 
     board VARCHAR(511) NOT NULL,
+    last_move VARCHAR(255),
     PRIMARY KEY (guest_id, day)
 );
 
 
 CREATE TABLE guests(
     id VARCHAR(255) NOT NULL,
-    games_played INT NOT NULL DEFAULT 0,
-    wins INT NOT NULL DEFAULT 0,
+    total_games INT NOT NULL DEFAULT 0,
+    total_wins INT NOT NULL DEFAULT 0,
     PRIMARY KEY (id)
 );
 

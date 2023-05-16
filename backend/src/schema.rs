@@ -20,18 +20,19 @@ diesel::table! {
 
 diesel::table! {
     guest_day_stats (guest_id, day) {
-        guest_id -> Nullable<Text>,
+        guest_id -> Text,
         day -> Text,
         status -> Text,
         board -> Text,
+        last_move -> Nullable<Text>,
     }
 }
 
 diesel::table! {
     guests (id) {
         id -> Text,
-        games_played -> Integer,
-        wins -> Integer,
+        total_games -> Integer,
+        total_wins -> Integer,
     }
 }
 
@@ -64,6 +65,7 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(guest_day_stats -> guests (guest_id));
 diesel::joinable!(user_day_stats -> users (user_id));
 diesel::joinable!(user_stats -> users (user_id));
 
