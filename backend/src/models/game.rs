@@ -16,6 +16,7 @@ pub struct Game {
 pub struct GameResult{
     pub uncovered: String,
     pub exploded: Option<String>,
+    pub flags: String,
 }
 
 #[derive(Deserialize, Insertable, Queryable, Serialize)]
@@ -26,6 +27,7 @@ pub struct UserDayStats {
     pub status: String,
     pub board: String,
     pub last_move: Option<String>,
+    pub flags: String,
 }
 
 

@@ -1,5 +1,8 @@
 const sqlite3 = require('sqlite3');
-const db = new sqlite3.Database("C:\\Users\\USUARIO\\Desktop\\database.db");
+const dotenv = require('dotenv');
+dotenv.config();
+console.log(process.env.DATABASE_URL)
+const db = new sqlite3.Database(process.env.DATABASE_URL);
 const moment = require('moment');
 
 const boards = [];

@@ -25,6 +25,7 @@ diesel::table! {
         status -> Text,
         board -> Text,
         last_move -> Nullable<Text>,
+        flags -> Text,
     }
 }
 
@@ -43,6 +44,7 @@ diesel::table! {
         status -> Text,
         board -> Text,
         last_move -> Nullable<Text>,
+        flags -> Text,
     }
 }
 

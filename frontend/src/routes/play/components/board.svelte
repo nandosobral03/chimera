@@ -4,8 +4,8 @@
     export let initialPosition: string;
 
     let dispatch = createEventDispatcher();
-	let moves:{x:number, y:number}[] = [];
-
+	export let moves:{x:number, y:number}[] = [];
+	export let flags: {x:number, y:number}[] = [];
 	let lastClicked = { x: -1, y: -1 };
 	const numberedBoard = JSON.parse(JSON.stringify(board));
 	const flagMask = Array.from({ length: board.length }, () =>
@@ -42,8 +42,20 @@
 
 		let [initialX, initialY] = initialPosition.split(":").map((x:string) => parseInt(x));
 		discover(initialX, initialY);
-
+		if(moves){
+			console.log(moves)
+			moves.forEach((move) => {
+				discover(move.x, move.y, true);
+			});
+		}
+		if(flags){
+			flags.forEach((flag) => {
+				flagMask[flag.x][flag.y] = true;
+			});
+		}
 	});
+
+	
 
 	const discover = (x: number, y: number, userEmitted=false) => {
 		numberedBoard[x][y].shown = true;
@@ -60,7 +72,7 @@
 				) => row.every((cell) => cell.shown || cell.value == -1)
 			)
 		) {
-			dispatch("gameover", { win: true, moves });
+			dispatch("gameover", { win: true, moves, flags: flagMask.map((row,i) => row.map((cell,j) => cell ? {x:i, y:j} : null)).flat().filter((x) => x) });
 			return;
 		}
 
@@ -86,7 +98,7 @@
 		if (numberedBoard[x][y].value == -1) {
 			gameStatus = -1;
             lastClicked = {x, y};
-			dispatch("gameover", { win: false, moves, last_move: {x, y} });
+			dispatch("gameover", { win: false, moves,  flags: flagMask.map((row,i) => row.map((cell,j) => cell ? {x:i, y:j} : null)).flat().filter((x) => x) });
 			for (let i = 0; i < numberedBoard.length; i++) {
 				for (let j = 0; j < numberedBoard[i].length; j++) {
 					if (numberedBoard[i][j].value == -1) {
@@ -118,7 +130,7 @@
 			for (let i = -1; i < 2; i++) {
 				for (let j = -1; j < 2; j++) {
 					if (numberedBoard[x + i] && numberedBoard[x + i][y + j] && !flagMask[x + i][y + j]) {
-						discover(x + i, y + j);
+						discover(x + i, y + j, true);
 					}
 				}
 			}

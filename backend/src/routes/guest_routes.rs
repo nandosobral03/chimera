@@ -119,3 +119,5 @@ pub async fn get_guest_current_stats_day_api(
         Err(err) => handle_error(err).into_response(),
     }
 }
+
+

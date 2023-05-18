@@ -29,12 +29,13 @@ async fn main() {
         .route("/user/stats", get(routes::user_routes::get_user_stats_api))
         .route("/user/day-stats", get(routes::user_routes::get_user_day_stats_api))
         .route("/user/current", get(routes::user_routes::get_user_current_day_stats_api))
+        .route("/game/next", get(routes::game_routes::get_time_until_next_game))
         .layer(CorsLayer::permissive());
 
     // run it with hyper on localhost:3000
+    println!("Listening on port 3000");
     axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
-    println!("Listening on port 3000");
 }

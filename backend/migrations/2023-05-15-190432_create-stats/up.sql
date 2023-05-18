@@ -14,6 +14,7 @@ CREATE TABLE user_day_stats (
     status VARCHAR(255) NOT NULL, 
     board VARCHAR(511) NOT NULL,
     last_move VARCHAR(255),
+    flags VARCHAR(511) NOT NULL,
     PRIMARY KEY (user_id, day)
 );
 
@@ -24,12 +25,13 @@ CREATE TABLE guest_day_stats (
     status VARCHAR(255) NOT NULL, 
     board VARCHAR(511) NOT NULL,
     last_move VARCHAR(255),
+    flags VARCHAR(511) NOT NULL,
     PRIMARY KEY (guest_id, day)
 );
 
 
 CREATE TABLE guests(
-    id VARCHAR(255) NOT NULL,
+    id VARCHAR(255) UNIQUE NOT NULL,
     total_games INT NOT NULL DEFAULT 0,
     total_wins INT NOT NULL DEFAULT 0,
     PRIMARY KEY (id)

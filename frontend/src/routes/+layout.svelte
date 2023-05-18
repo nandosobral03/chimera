@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { browser } from '$app/environment'; 
-	import { onMount } from "svelte";
 	import type {  LayoutData } from "./$types";
 
     export let data: LayoutData

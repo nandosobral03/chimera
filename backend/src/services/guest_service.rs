@@ -56,6 +56,7 @@ pub async fn save_won_game_guest(
             day.eq(&result_day),
             status.eq("won"),
             board.eq(result.uncovered),
+            flags.eq(result.flags),
             last_move.eq(None::<String>),
         ))
         .execute(&mut conn);
@@ -122,6 +123,7 @@ pub async fn save_lost_game_guest(
             day.eq(&result_day),
             status.eq("lost"),
             board.eq(result.uncovered),
+            flags.eq(result.flags),
             last_move.eq(&result.exploded),
         ))
         .execute(&mut conn);

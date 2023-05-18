@@ -190,6 +190,22 @@ pub fn validate_game_result(result: &GameResult)-> Result<(), MyError>{
         })
     }
 
+    if result.flags.len() == 0 {
+        return Ok(())
+    }
+    let flags = 
+        result.flags.split(",").collect::<Vec<&str>>()
+        .iter()
+        .map(|&x | validate_cell(x))
+        .collect::<Result<Vec<()>, MyError>>();
+    if flags.is_err() {
+        return Err(MyError{
+            message: String::from("Invalid cell. Please use the format x:y"),
+            code: 400
+        })
+    }
+
+
 
     Ok(())
 }

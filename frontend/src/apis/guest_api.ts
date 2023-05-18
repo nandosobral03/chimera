@@ -22,4 +22,48 @@ export let getCurrentGuestGame = async () => {
 
 }
 
-export default {getCurrentGuestGame};
+
+
+export let postGameResultGuest = async (result: GameResult) => {
+        const url = `${PUBLIC_BACKEND_URL}/game/guest`;
+        let body = {
+            uncovered: result.moves.map(move => {
+                return `${move.x}:${move.y}`
+            }).join(","),
+            exploded: result.won ? undefined : `${result.moves[result.moves.length - 1].x}:${result.moves[result.moves.length - 1].y}`,
+            flags: result.flags.map(flag => {
+                return `${flag.x}:${flag.y}`
+            }).join(",")
+        }
+        const response = await axios.post(url,
+            body,
+            {headers: {
+                guest_id: localStorage.getItem("guest_id")
+            }}
+        );
+        console.log(response.data)
+        return response.data;
+}
+
+type GuestStats = {
+    id : number,
+    total_games : number,
+    total_wins : number,
+}
+
+// type the function
+
+
+
+export let getGuestStats: () => Promise<GuestStats> = async () => {
+        const url = `${PUBLIC_BACKEND_URL}/guest/stats`;
+        const response = await axios.get(url, {
+            headers: {
+                guest_id: localStorage.getItem("guest_id")
+            }
+        });
+        return response.data;
+}
+
+
+export default {getCurrentGuestGame, postGameResultGuest, getGuestStats}
