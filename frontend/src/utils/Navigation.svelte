@@ -11,8 +11,12 @@
             path: '/about'
         },
         {
-            name: 'Contact',
-            path: '/contact'
+            name: 'Stats',
+            path: '/stats'
+        },
+        {
+            name: 'Leaderboard',
+            path: '/leaderboard'
         }
     ]
 </script>
