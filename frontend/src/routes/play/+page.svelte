@@ -73,6 +73,7 @@
 	});
 
 	const gameover = async (e: GameResult) => {
+		showModal = true;
 		if(!playable) return;
 		await postGameResultGuest(e);
 	};

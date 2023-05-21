@@ -41,7 +41,6 @@ export let postGameResultGuest = async (result: GameResult) => {
                 guest_id: localStorage.getItem("guest_id")
             }}
         );
-        console.log(response.data)
         return response.data;
 }
 

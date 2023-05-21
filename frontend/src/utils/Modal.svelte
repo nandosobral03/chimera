@@ -4,10 +4,12 @@
 	import Share from "./Share.svelte";
 	import { createEventDispatcher, onMount } from "svelte";
 	import { browser } from "$app/environment";
+	import PrimaryButton from "./PrimaryButton.svelte";
     export let result: GameResult;
     export let game : Game;
     const dispatch = createEventDispatcher();
-
+    
+    let showShare = false; 
     let height = 300;
     let width = 400;
     onMount(() => {
@@ -41,9 +43,15 @@
             <span> Wait until tomorrow to play again!</span>
             <TimeLeft/>
         </div>
-        <div class="">
+        <div class="stats">
             <Stats height={height} width={width}/>
-            <Share result={result} game={game} />
+            {#if showShare}
+                <Share result={result} game={game} on:close={()=>{ showShare = false; }}/>
+            {/if}
+            <div style="display: flex; gap: 16px;">
+                <PrimaryButton on:click={()=>{showShare = true;}}>Share</PrimaryButton>
+                <PrimaryButton on:click={()=>{ dispatch('close'); }}>Close</PrimaryButton>
+            </div>
         </div>
     </div>
 </section>
@@ -63,7 +71,7 @@
 
     .modal{
         width: clamp(300px, 50%, 500px);
-        background-color: white;
+        background-color: var(--background-clear);    
         border-radius: 10px;
         padding: 32px;
         display: flex;
@@ -71,6 +79,13 @@
         justify-content: space-between;
         align-items: center;
         z-index: 100;
+    }
+
+    .stats{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
     }
 
 </style>
