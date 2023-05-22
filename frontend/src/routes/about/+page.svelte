@@ -27,9 +27,7 @@
 </section>
 
 <style lang="scss">
-	section {
-		padding: 1rem;
-	}
+	
 	h1 {
 		color: var(--shade);
 		text-transform: uppercase;

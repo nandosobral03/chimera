@@ -13,7 +13,8 @@
 	let result : GameResult = {
 		won: false,
 		moves: [],
-		flags: []
+		flags: [],
+		timeTaken: 0
 	}
 	let game: Game = {
 		board: data.board,
@@ -113,7 +114,8 @@
 		width: 100%;
 		display: flex;
 		flex-direction: column;
-		justify-content: space-evenly;
+		justify-content: space-between;
+		padding: 1rem;
 		align-items: center;
 	}
 </style>

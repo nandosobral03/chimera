@@ -26,6 +26,7 @@ diesel::table! {
         board -> Text,
         last_move -> Nullable<Text>,
         flags -> Text,
+        time_taken -> Integer,
     }
 }
 
@@ -45,6 +46,7 @@ diesel::table! {
         board -> Text,
         last_move -> Nullable<Text>,
         flags -> Text,
+        time_taken -> Integer,
     }
 }
 
@@ -59,7 +61,7 @@ diesel::table! {
 diesel::table! {
     users (id) {
         id -> Integer,
-        email -> Text,
+        username -> Text,
         password_hash -> Text,
         salt -> Text,
         created_at -> Timestamp,

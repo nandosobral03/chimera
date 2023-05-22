@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use diesel::prelude::*;
-use crate::{error_handler::MyError,database::establish_connection, models::{game::{Game, DayStat, GameResult}}};
+use crate::{error_handler::MyError,database::establish_connection, models::{game::{Game, DayStat, GameResult, DayStateResponse}}};
 
 pub fn get_game_by_day(day_to_find: &str) -> Result<Game, MyError> {
     validate_day(day_to_find)?;
@@ -79,7 +79,7 @@ pub fn record_stats(result_day: String, won: bool, last_move_played: Option<Stri
     .values((
         crate::schema::day_stats::dsl::day.eq(&result_day),
         crate::schema::day_stats::dsl::total_games.eq(1),
-        crate::schema::day_stats::dsl::total_wins.eq(if won {0} else {0}),
+        crate::schema::day_stats::dsl::total_wins.eq(if won {1} else {0}),
         crate::schema::day_stats::dsl::aggregated_board_stats.eq("{}"),
     ))
     .execute(&mut conn);
@@ -124,9 +124,8 @@ pub fn record_stats(result_day: String, won: bool, last_move_played: Option<Stri
             Some(val) =>{ 
                 match conn.transaction::<_, diesel::result::Error, _>(|conn| {
                     use crate::schema::day_stats::dsl::*;
-                    let existing_day_stat: DayStat = day_stats.first(conn)?;
-                    let updated_total_games = existing_day_stat.total_games + 1;
                     let current_day_stat = day_stats.filter(day.eq(&result_day)).first::<DayStat>(conn)?;
+                    let updated_total_games = current_day_stat.total_games + 1;
                     let mut board_stats: BTreeMap<String, i32> = serde_json::from_str(&current_day_stat.aggregated_board_stats).unwrap_or(BTreeMap::new());
                     if board_stats.contains_key(&val) {
                         let updated_board_stat = board_stats.get(&val).unwrap() + 1;
@@ -156,7 +155,7 @@ pub fn record_stats(result_day: String, won: bool, last_move_played: Option<Stri
 }
 
 
-pub fn get_day_stats(day_to_find: &str) -> Result<DayStat, MyError> {
+pub fn get_day_stats(day_to_find: &str) -> Result<DayStateResponse, MyError> {
     validate_day(day_to_find)?;
     use crate::schema::day_stats::dsl::*;
     let connection = &mut establish_connection();
@@ -164,7 +163,14 @@ pub fn get_day_stats(day_to_find: &str) -> Result<DayStat, MyError> {
         .filter(day.eq(day_to_find))
         .first::<DayStat>(connection);
     match results {
-        Ok(day_stat) => Ok(day_stat),
+        Ok(day_stat) => Ok(
+            DayStateResponse{
+                day: day_stat.day,
+                total_games: day_stat.total_games,
+                total_wins: day_stat.total_wins,
+                aggregated_board_stats: serde_json::from_str(&day_stat.aggregated_board_stats).unwrap()
+            }
+        ),
         Err(_) => Err(MyError{
             message: String::from("Day stat not found"),
             code: 404

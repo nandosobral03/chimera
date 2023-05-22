@@ -25,7 +25,7 @@ pub fn sign_up(user: UserRequest) -> Result<Token, MyError> {
     match password_hash {
         Ok(hash) => {
              let new_user = UserCreate {
-                email: user.email.clone(),
+                username: user.username.clone(),
                 password_hash: hash.format_for_version(bcrypt::Version::TwoB),
                 salt: hex::encode(salt),
             };
@@ -35,8 +35,8 @@ pub fn sign_up(user: UserRequest) -> Result<Token, MyError> {
                 .execute(&mut conn)
             {
                 Ok(_) =>{
-                    let new_user_id = users::table.filter(users::email.eq(&user.email)).select(users::id).first::<i32>(&mut conn).unwrap();
-                    generate_token(user.email,new_user_id)
+                    let new_user_id = users::table.filter(users::username.eq(&user.username)).select(users::id).first::<i32>(&mut conn).unwrap();
+                    generate_token(user.username,new_user_id)
                 },
                 Err(err) => {
                     return Err(MyError {
@@ -60,7 +60,7 @@ pub fn sign_up(user: UserRequest) -> Result<Token, MyError> {
 pub fn login(user: UserRequest) -> Result<Token, MyError> {
     use crate::schema::users::dsl::*;
     let mut conn = crate::database::establish_connection();
-    let result = users.filter(email.eq(&user.email)).first::<User>(&mut conn);
+    let result = users.filter(username.eq(&user.username)).first::<User>(&mut conn);
     match result {
         Ok(u) => {
             let mut new_salt = [0u8; 16];
@@ -69,7 +69,7 @@ pub fn login(user: UserRequest) -> Result<Token, MyError> {
             match new_hash {
                 Ok(hash) => {
                     if hash.format_for_version(bcrypt::Version::TwoB) == u.password_hash {
-                        let token = generate_token(user.email, u.id);
+                        let token = generate_token(user.username, u.id);
                         match token {
                             Ok(token) => {
                                 return Ok(token);
@@ -103,12 +103,12 @@ pub fn login(user: UserRequest) -> Result<Token, MyError> {
     }
 }
 
-pub fn generate_token(email: String, new_user_id: i32) -> Result<Token, MyError> {
+pub fn generate_token(username: String, new_user_id: i32) -> Result<Token, MyError> {
     dotenv().ok();
     let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     let key: Hmac<Sha256> = Hmac::new_from_slice(secret.as_bytes()).unwrap();
     let mut claims = BTreeMap::new();
-    claims.insert("sub", email);
+    claims.insert("sub", username);
     claims.insert("user", new_user_id.to_string());
     claims.insert("iat", chrono::Utc::now().timestamp().to_string());
     claims.insert(
@@ -151,6 +151,7 @@ pub async fn save_won_game(
                 status.eq("won"),
                 board.eq(result.uncovered),
                 flags.eq(result.flags),
+                time_taken.eq(result.time_taken),
                 last_move.eq(None::<String>),
             ))
             .execute(&mut conn)
@@ -200,6 +201,7 @@ pub async fn save_lost_game(
                 flags.eq(result.flags),
                 board.eq(result.uncovered),
                 last_move.eq(&result.exploded),
+                time_taken.eq(result.time_taken),
             ))
             .execute(&mut conn)
         {

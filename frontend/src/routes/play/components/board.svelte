@@ -2,10 +2,9 @@
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	export let board: boolean[][];
 	export let initialPosition: string;
-
+	let timeStart = 0;
 	let windowSize = { width: window.innerWidth, height: window.innerHeight };
-	let verticalDisplay = window.innerWidth/ window.innerHeight < 30/16
-
+	let verticalDisplay = window.innerWidth / window.innerHeight < 30 / 16;
 	let cellSize = 0;
 
 	function getCellSize(vertical = false): number {
@@ -46,27 +45,15 @@
 		verticalDisplay = windowSize.width < windowSize.height;
 		console.log('calculating cell size', verticalDisplay, windowSize);
 		cellSize = getCellSize(verticalDisplay);
-		};
+	};
 
 	onDestroy(() => {
-		window.removeEventListener('resize', calculateCellSize)
-	})
+		window.removeEventListener('resize', calculateCellSize);
+	});
 
 	onMount(() => {
 		window.addEventListener('resize', calculateCellSize);
 		calculateCellSize();
-		
-		if (verticalDisplay) {
-			let verticalBoard = Array.from({ length: board[0].length }, () =>
-				Array.from({ length: board.length }, () => false)
-			);
-			for (let i = 0; i < board.length; i++) {
-				for (let j = 0; j < board[i].length; j++) {
-					verticalBoard[j][i] = board[i][j];
-				}
-			}
-		}
-		
 		for (let i = 0; i < board.length; i++) {
 			for (let j = 0; j < board[i].length; j++) {
 				if (board[i][j]) {
@@ -112,13 +99,15 @@
 				) => row.every((cell) => cell.shown || cell.value == -1)
 			)
 		) {
+			const timeTaken = Date.now() - timeStart;
 			dispatch('gameover', {
 				win: true,
 				moves,
 				flags: flagMask
 					.map((row, i) => row.map((cell, j) => (cell ? { x: i, y: j } : null)))
 					.flat()
-					.filter((x) => x)
+					.filter((x) => x),
+				timeTaken
 			});
 			return;
 		}
@@ -145,13 +134,15 @@
 		if (numberedBoard[x][y].value == -1) {
 			gameStatus = -1;
 			lastClicked = { x, y };
+			const timeTaken = Date.now() - timeStart;
 			dispatch('gameover', {
 				win: false,
 				moves,
 				flags: flagMask
 					.map((row, i) => row.map((cell, j) => (cell ? { x: i, y: j } : null)))
 					.flat()
-					.filter((x) => x)
+					.filter((x) => x),
+				timeTaken
 			});
 			for (let i = 0; i < numberedBoard.length; i++) {
 				for (let j = 0; j < numberedBoard[i].length; j++) {
@@ -205,6 +196,7 @@
 		x: number,
 		y: number
 	) => {
+		if (timeStart == 0) timeStart = Date.now();
 		if (gameStatus == 0) {
 			fun(x, y, true);
 		} else {
@@ -287,8 +279,11 @@
 		grid-template-columns: repeat(30, 1fr);
 		grid-template-rows: repeat(16, 1fr);
 		&.vertical {
-			grid-template-columns: repeat(16, 1fr);
-			grid-template-rows: repeat(30, 1fr);
+			rotate: 90deg;
+			margin-bottom: 165px;
+			> div {
+				transform: rotate(-90deg);
+			}
 		}
 	}
 	.cell {

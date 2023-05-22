@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 use diesel::{Insertable, Queryable};
 use crate::schema::user_day_stats;
@@ -17,6 +19,7 @@ pub struct GameResult{
     pub uncovered: String,
     pub exploded: Option<String>,
     pub flags: String,
+    pub time_taken: i32,
 }
 
 #[derive(Deserialize, Insertable, Queryable, Serialize)]
@@ -28,14 +31,23 @@ pub struct UserDayStats {
     pub board: String,
     pub last_move: Option<String>,
     pub flags: String,
+    pub time_taken: i32,
 }
 
 
-#[derive(Deserialize,Queryable, Serialize)]
+#[derive(Deserialize,Queryable, Serialize, Debug)]
 pub struct DayStat{
     pub day: String,
     pub total_games: i32,
     pub total_wins: i32,
-    pub aggregated_board_stats: String,
+    pub aggregated_board_stats: String
+}
+
+#[derive(Serialize)]
+pub struct DayStateResponse{
+    pub day: String,
+    pub total_games: i32,
+    pub total_wins: i32,
+    pub aggregated_board_stats: HashMap<String, i32>
 }
 

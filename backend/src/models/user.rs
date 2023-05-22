@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Queryable, Deserialize)]
 pub struct User {
     pub id: i32,
-    pub email: String,
+    pub username: String,
     pub password_hash: String,
     pub salt: String,
     pub created_at: String,
@@ -16,7 +16,7 @@ pub struct User {
 #[derive(Insertable, Deserialize)]
 #[diesel(table_name = users)]
 pub struct UserCreate {
-    pub email: String,
+    pub username: String,
     pub password_hash: String,
     pub salt: String,
 
@@ -24,7 +24,7 @@ pub struct UserCreate {
 
 #[derive(Deserialize)]
 pub struct UserRequest {
-    pub email: String,
+    pub username: String,
     pub password: String,
 }
 

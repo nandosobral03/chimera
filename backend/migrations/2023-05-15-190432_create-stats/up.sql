@@ -15,6 +15,7 @@ CREATE TABLE user_day_stats (
     board VARCHAR(511) NOT NULL,
     last_move VARCHAR(255),
     flags VARCHAR(511) NOT NULL,
+    time_taken INT NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day)
 );
 
@@ -26,6 +27,7 @@ CREATE TABLE guest_day_stats (
     board VARCHAR(511) NOT NULL,
     last_move VARCHAR(255),
     flags VARCHAR(511) NOT NULL,
+    time_taken INT NOT NULL DEFAULT 0,
     PRIMARY KEY (guest_id, day)
 );
 

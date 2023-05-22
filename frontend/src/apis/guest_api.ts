@@ -33,7 +33,8 @@ export let postGameResultGuest = async (result: GameResult) => {
             exploded: result.won ? undefined : `${result.moves[result.moves.length - 1].x}:${result.moves[result.moves.length - 1].y}`,
             flags: result.flags.map(flag => {
                 return `${flag.x}:${flag.y}`
-            }).join(",")
+            }).join(","),
+            time_taken: result.timeTaken,
         }
         const response = await axios.post(url,
             body,

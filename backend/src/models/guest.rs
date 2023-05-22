@@ -26,5 +26,6 @@ pub struct GuestDayStats{
     pub status: String,
     pub board: String,
     pub last_move: Option<String>,
-    pub flags: String
+    pub flags: String,
+    pub time_taken: i32,
 }
