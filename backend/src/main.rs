@@ -30,6 +30,9 @@ async fn main() {
         .route("/user/day-stats", get(routes::user_routes::get_user_day_stats_api))
         .route("/user/current", get(routes::user_routes::get_user_current_day_stats_api))
         .route("/game/next", get(routes::game_routes::get_time_until_next_game))
+        .route("/game/leaderboard", get(routes::game_routes::get_all_time_leatherboard_api))
+        .route("/game/leaderboard/daily", get(routes::game_routes::get_day_leatherboard_api))
+        .route("/game/leaderboard/current", get(routes::game_routes::get_current_leatherboard_api))
         .layer(CorsLayer::permissive());
 
     // run it with hyper on localhost:3000

@@ -142,12 +142,15 @@ pub async fn save_lost_game_guest(
     Ok(())
 }
 
-fn record_guest_stats(guest_id: String, won: bool) -> Result<(), MyError> {
+fn record_guest_stats(guest_id_param: String, won: bool) -> Result<(), MyError> {
     use crate::schema::guests::dsl::*;
+    use crate::schema::guest_day_stats::dsl::*;
     let mut conn = crate::database::establish_connection();
 
-    let guest_result = guests.filter(id.eq(&guest_id)).first::<Guest>(&mut conn);
-
+    let guest_result = guests.filter(id.eq(&guest_id_param)).first::<Guest>(&mut conn);
+    let yesterday = (chrono::Local::now().date_naive() - chrono::Duration::days(1))
+        .format("%d/%m/%Y")
+        .to_string();
     match guest_result {
         Ok(guest) => {
             let new_total_games = guest.total_games + 1;
@@ -156,11 +159,26 @@ fn record_guest_stats(guest_id: String, won: bool) -> Result<(), MyError> {
             } else {
                 guest.total_wins
             };
+            let last_win: Result<GuestDayStats, _> = guest_day_stats
+                .filter(guest_id.eq(&guest_id_param))
+                .filter(status.eq("won"))
+                .order_by(day.desc())
+                .first::<GuestDayStats>(&mut conn);
             let update_res = diesel::update(guests)
-                .filter(id.eq(&guest_id))
+                .filter(id.eq(&guest_id_param))
                 .set((
                     total_games.eq(new_total_games),
                     total_wins.eq(new_total_wins),
+                    win_streak.eq(match last_win {
+                        Ok(last_win) => {
+                            if last_win.day == yesterday {
+                                guest.win_streak + (won as i32)
+                            } else {
+                                won as i32
+                            }
+                        }
+                        Err(_) => won as i32,
+                    }),
                 ))
                 .execute(&mut conn);
             if update_res.is_err() {

@@ -280,7 +280,6 @@
 		grid-template-rows: repeat(16, 1fr);
 		&.vertical {
 			rotate: 90deg;
-			margin-bottom: 165px;
 			> div {
 				transform: rotate(-90deg);
 			}

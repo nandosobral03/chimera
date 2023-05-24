@@ -91,3 +91,33 @@ pub async fn get_time_until_next_game() -> impl IntoResponse {
     ).into_response()
 
 }
+
+pub async fn get_day_leatherboard_api(
+    Query (day_query): Query<DayQuery>
+) -> impl IntoResponse {
+    let day = day_query.day;
+    let stats = crate::services::game_service::get_day_leaderboards(&day);
+    match stats {
+        Ok(stats) => Json(json!(stats)).into_response(),
+        Err(err) => handle_error(err).into_response()
+    }
+}
+
+pub async fn get_current_leatherboard_api() -> impl IntoResponse{
+    let day = chrono::Local::now().format("%d/%m/%Y").to_string();
+    let stats = crate::services::game_service::get_day_leaderboards(&day);
+    match stats {
+        Ok(stats) => Json(json!(stats)).into_response(),
+        Err(err) => handle_error(err).into_response()
+    }
+
+}
+
+pub async fn get_all_time_leatherboard_api() -> impl IntoResponse{
+    let stats = crate::services::game_service::get_all_time_stats();
+    match stats {
+        Ok(stats) => Json(json!(stats)).into_response(),
+        Err(err) => handle_error(err).into_response()
+    }
+}
+

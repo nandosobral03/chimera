@@ -222,19 +222,15 @@ pub async fn save_lost_game(
 
 fn record_user_stats(userid: i32, won:bool) -> Result<(), MyError>{
     use crate::schema::user_stats::dsl::*;
-
     let mut conn = crate::database::establish_connection();
-    let exists = diesel::select(diesel::dsl::exists( 
-        user_stats.filter(user_id.eq(&userid))
-    )).get_result::<bool>(&mut conn).unwrap();
-
-
+    let exists = user_stats.filter(user_id.eq(&userid)).count().get_result::<i64>(&mut conn).unwrap() != 0;
 
     let insert_result = diesel::insert_into(crate::schema::user_stats::table)
     .values((
         user_id.eq(&userid),
         total_games.eq(0),
         total_wins.eq(0),
+        win_streak.eq(0),
     ))
     .execute(&mut conn);
 
@@ -253,11 +249,31 @@ fn record_user_stats(userid: i32, won:bool) -> Result<(), MyError>{
     if won {
         stats.total_wins += 1;
     }
+    let yesterday = (chrono::Local::now().date_naive() - chrono::Duration::days(1))
+    .format("%d/%m/%Y")
+    .to_string();
+
+   let last_win: Result<UserDayStats, _> = crate::schema::user_day_stats::table
+        .filter(crate::schema::user_day_stats::user_id.eq(&userid))
+        .filter(crate::schema::user_day_stats::status.eq("won"))
+        .order(crate::schema::user_day_stats::day.desc())
+        .first(&mut conn);
+
 
     match diesel::update(user_stats)
         .set((
             total_games.eq(stats.total_games),
             total_wins.eq(stats.total_wins),
+            win_streak.eq(match last_win {
+                Ok(win) => {
+                    if win.day == yesterday {
+                        stats.win_streak + (won as i32)
+                    } else {
+                        won as i32
+                    }
+                }
+                Err(_) => won as i32,
+            }),
         ))
         .execute(&mut conn)
     {

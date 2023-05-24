@@ -35,6 +35,7 @@ diesel::table! {
         id -> Text,
         total_games -> Integer,
         total_wins -> Integer,
+        win_streak -> Integer,
     }
 }
 
@@ -53,6 +54,7 @@ diesel::table! {
 diesel::table! {
     user_stats (user_id) {
         user_id -> Integer,
+        win_streak -> Integer,
         total_games -> Integer,
         total_wins -> Integer,
     }

@@ -15,7 +15,7 @@ pub struct Guest {
     pub id: String,
     pub total_games: i32,
     pub total_wins: i32,
-
+    pub win_streak: i32,
 }
 
 #[derive(Insertable, Deserialize, Queryable, Serialize)]

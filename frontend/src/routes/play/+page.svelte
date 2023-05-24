@@ -87,15 +87,17 @@
 		<div style={minesRemaining < 0 ? 'color: red' : ''}>
 			🚩 {data.mineCount - minesRemaining}? / {data.mineCount}
 		</div>
-		<Board
-			board={data.board}
-			initialPosition={data.initialPosition}
-			on:gameover={(e) => gameover(e.detail)}
-			on:flag={(e) => minesRemaining--}
-			on:unflag={(e) => minesRemaining++}
-			moves={result.moves}
-			flags={result.flags}
-		/>
+		<div class="board_container">
+			<Board
+				board={data.board}
+				initialPosition={data.initialPosition}
+				on:gameover={(e) => gameover(e.detail)}
+				on:flag={(e) => minesRemaining--}
+				on:unflag={(e) => minesRemaining++}
+				moves={result.moves}
+				flags={result.flags}
+			/>
+		</div>
 	{/if}
 
 
@@ -117,5 +119,13 @@
 		justify-content: space-between;
 		padding: 1rem;
 		align-items: center;
+	}
+
+	.board_container{
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 100%;
+		width: 100%;
 	}
 </style>

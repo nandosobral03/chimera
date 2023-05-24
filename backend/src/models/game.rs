@@ -40,7 +40,7 @@ pub struct DayStat{
     pub day: String,
     pub total_games: i32,
     pub total_wins: i32,
-    pub aggregated_board_stats: String
+    pub aggregated_board_stats: String,
 }
 
 #[derive(Serialize)]
@@ -49,5 +49,32 @@ pub struct DayStateResponse{
     pub total_games: i32,
     pub total_wins: i32,
     pub aggregated_board_stats: HashMap<String, i32>
+}
+
+
+#[derive(Serialize)]
+pub struct DayLeaderboardResponse{
+    pub day: String,
+    pub leaderboard: Vec<LeaderboardEntry>
+}
+
+#[derive(Serialize)]
+pub struct LeaderboardEntry{
+    pub username: String,
+    pub time_taken: i32
+}
+
+#[derive(Serialize)]
+pub struct AllTimeLeaderboardResponse{
+    pub users: Vec<AllTimeLeaderboardEntry>,
+    pub guests: Vec<AllTimeLeaderboardEntry>
+}
+
+#[derive(Serialize)]
+pub struct AllTimeLeaderboardEntry{
+    pub username: String,
+    pub total_wins: i32,
+    pub total_games: i32,
+    pub win_streak: i32,
 }
 

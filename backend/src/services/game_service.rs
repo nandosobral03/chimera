@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use diesel::prelude::*;
-use crate::{error_handler::MyError,database::establish_connection, models::{game::{Game, DayStat, GameResult, DayStateResponse}}};
+use crate::{error_handler::MyError,database::establish_connection, models::{game::{Game, DayStat, GameResult, DayStateResponse, DayLeaderboardResponse, UserDayStats, LeaderboardEntry, AllTimeLeaderboardEntry, AllTimeLeaderboardResponse}, user::{User, UserStats}, guest::{Guest}}};
 
 pub fn get_game_by_day(day_to_find: &str) -> Result<Game, MyError> {
     validate_day(day_to_find)?;
@@ -78,8 +78,8 @@ pub fn record_stats(result_day: String, won: bool, last_move_played: Option<Stri
     let insert_result = diesel::insert_into(crate::schema::day_stats::table)
     .values((
         crate::schema::day_stats::dsl::day.eq(&result_day),
-        crate::schema::day_stats::dsl::total_games.eq(1),
-        crate::schema::day_stats::dsl::total_wins.eq(if won {1} else {0}),
+        crate::schema::day_stats::dsl::total_games.eq(0),
+        crate::schema::day_stats::dsl::total_wins.eq(0),
         crate::schema::day_stats::dsl::aggregated_board_stats.eq("{}"),
     ))
     .execute(&mut conn);
@@ -216,6 +216,93 @@ pub fn validate_game_result(result: &GameResult)-> Result<(), MyError>{
     Ok(())
 }
 
+
+pub fn get_day_leaderboards(day_to_find: &str) -> Result<DayLeaderboardResponse, MyError> {
+    use crate::schema::user_day_stats::dsl::*;
+    use crate::schema::users::dsl::*;
+    validate_day(day_to_find)?;
+    let connection = &mut establish_connection();
+    let results: Result<Vec<UserDayStats>, _> = user_day_stats
+        .filter(crate::schema::user_day_stats::dsl::day.eq(day_to_find))
+        .filter(crate::schema::user_day_stats::dsl::status.eq("won"))
+        .order(crate::schema::user_day_stats::dsl::time_taken.asc())
+        .limit(20)
+        .load::<UserDayStats>(connection);
+    
+    match results {
+        Ok(day_stat) => {
+            let leaderboard: Vec<LeaderboardEntry> = day_stat.iter().map(|x| {
+                let user = users.filter(crate::schema::users::dsl::id.eq(x.user_id)).first::<User>(connection);
+                match user {
+                    Ok(user) => {
+                        LeaderboardEntry{
+                            username: user.username.clone(),
+                            time_taken: x.time_taken
+                        }
+                    },
+                    Err(_) => {
+                        LeaderboardEntry{
+                            username: String::from("Unknown"),
+                            time_taken: x.time_taken
+                        }
+                    }
+                }
+            }).collect();
+            Ok(DayLeaderboardResponse { day: day_to_find.to_string(), leaderboard })
+        },
+        Err(_) => Err(MyError{
+                message: String::from("Day stat not found"),
+                code: 404
+            })
+    }
+   
+}
+
+
+pub fn get_all_time_stats() -> Result<AllTimeLeaderboardResponse, MyError> {
+    let connection = &mut establish_connection();
+    let user_all_time_stats = {
+        use crate::schema::user_stats::dsl::*;
+        let result = user_stats.order(total_games.desc()).limit(20).load::<UserStats>(connection);
+        match result {
+            Ok(stats) => stats,
+            Err(_) => Vec::new()
+        }
+    };
+
+    let guest_all_time_stats = {
+        use crate::schema::guests::dsl::*;
+        let result = guests.order(total_games.desc()).limit(20).load::<Guest>(connection);
+        match result {
+            Ok(stats) => stats,
+            Err(_) => Vec::new()
+        }
+    };    
+
+    let user_list = user_all_time_stats.iter().map(|x| {
+        AllTimeLeaderboardEntry{
+            username: x.user_id.to_string(),
+            win_streak: x.win_streak,
+            total_games: x.total_games,
+            total_wins: x.total_wins,
+        }}).collect::<Vec<AllTimeLeaderboardEntry>>();
+   
+   let guest_list = guest_all_time_stats.iter().map(|x| {
+        AllTimeLeaderboardEntry{
+            username: x.id.clone(),
+            win_streak: x.win_streak,
+            total_games: x.total_games,
+            total_wins: x.total_wins,
+        }}).collect::<Vec<AllTimeLeaderboardEntry>>();
+
+    Ok(AllTimeLeaderboardResponse{
+        users: user_list,
+        guests: guest_list
+    })
+}
+
+
+
 fn validate_cell(cell: &str) -> Result<(), MyError> {
     let parts = cell.split(":").collect::<Vec<&str>>();
     if parts.len() != 2 {
@@ -243,3 +330,5 @@ fn validate_cell(cell: &str) -> Result<(), MyError> {
     }
     Ok(())
 }
+
+
