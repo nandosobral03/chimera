@@ -3,7 +3,7 @@
 
     let routes = [
         {
-            name: 'Home',
+            name: 'Play',
             path: '/play'
         },
         {

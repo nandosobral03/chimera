@@ -280,8 +280,15 @@ pub fn get_all_time_stats() -> Result<AllTimeLeaderboardResponse, MyError> {
     };    
 
     let user_list = user_all_time_stats.iter().map(|x| {
+        use crate::schema::users::dsl::*;
         AllTimeLeaderboardEntry{
-            username: x.user_id.to_string(),
+            username: {
+                let user = users.filter(crate::schema::users::dsl::id.eq(x.user_id)).first::<User>(connection);
+                match user {
+                    Ok(user) => user.username.clone(),
+                    Err(_) => String::from("Unknown")
+                }
+            },
             win_streak: x.win_streak,
             total_games: x.total_games,
             total_wins: x.total_wins,
