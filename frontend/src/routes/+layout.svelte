@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type {  LayoutData } from "./$types";
 	import Navigation from "../utils/Navigation.svelte";
+	import Login from "../utils/AuthModal.svelte";
+	import UserInfo from "../utils/UserInfo.svelte";
     export let data: LayoutData
 	let showNavigation = false;
 	
@@ -14,6 +16,7 @@
 		<slot />
 		<Navigation {showNavigation} />
 	</article>
+	<UserInfo/>
 </div>
 
 <style lang="scss">

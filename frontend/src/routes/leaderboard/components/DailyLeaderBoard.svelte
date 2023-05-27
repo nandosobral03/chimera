@@ -130,7 +130,7 @@
 		border: 1px solid var(--shade);
 		flex-grow: 1;
 		overflow: auto;
-		margin-top: 48px;
+		margin: 48px auto;
 	}
 
 	.header {

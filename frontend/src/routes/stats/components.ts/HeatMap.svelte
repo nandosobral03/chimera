@@ -157,14 +157,12 @@
 		background-color: lightgrey;
 		box-shadow: 1px 1px 1px 0px black;
 		font-size: clamp(0.6rem, 1.5vw, 1rem);
-		cursor: pointer;
 	}
 
 	.bomb {
 		display: grid;
 		place-items: center;
 		box-shadow: 1px 1px 1px 0px black;
-		cursor: pointer;
 		svg {
 			scale: 0.5;
 			fill: var(--shade);

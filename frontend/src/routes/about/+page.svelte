@@ -48,4 +48,8 @@
 			color: var(--light-accent);
 		}
 	}
+
+	section{
+		padding: 1rem;
+	}
 </style>
