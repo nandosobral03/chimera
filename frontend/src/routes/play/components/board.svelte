@@ -101,7 +101,7 @@
 		) {
 			const timeTaken = Date.now() - timeStart;
 			dispatch('gameover', {
-				win: true,
+				won: true,
 				moves,
 				flags: flagMask
 					.map((row, i) => row.map((cell, j) => (cell ? { x: i, y: j } : null)))
@@ -136,7 +136,7 @@
 			lastClicked = { x, y };
 			const timeTaken = Date.now() - timeStart;
 			dispatch('gameover', {
-				win: false,
+				won: false,
 				moves,
 				flags: flagMask
 					.map((row, i) => row.map((cell, j) => (cell ? { x: i, y: j } : null)))

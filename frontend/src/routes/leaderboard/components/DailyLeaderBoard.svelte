@@ -18,9 +18,9 @@
 
 	const getTime = (time: number) => {
 		//convert seconds to minutes and seconds
-		let minutes = Math.floor(time / 60);
-		let seconds = time - minutes * 60;
-		return `${minutes}m ${seconds}s`;
+		let minutes = Math.floor(time / 60000);
+		let seconds = time - minutes * 60000;
+		return `${minutes}m ${Math.floor(seconds / 1000)}s`;
 	};
 </script>
 

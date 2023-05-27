@@ -1,12 +1,22 @@
 <script lang="ts">
-	import type {  LayoutData } from "./$types";
 	import Navigation from "../utils/Navigation.svelte";
-	import Login from "../utils/AuthModal.svelte";
 	import UserInfo from "../utils/UserInfo.svelte";
-    export let data: LayoutData
+	import * as jose from "jose";
+	import { user } from "../stores/user.store";
+	import { onMount } from "svelte";
+	import { browser } from "$app/environment";
 	let showNavigation = false;
+	let showUserInfo = false;
+	onMount(() => {
+		if(!browser) return;
+		const token = localStorage.getItem("token");
+		if (token) {
+			const info = jose.decodeJwt(token);
+			user.set(info.sub);
+		}
+		showUserInfo = true;
+	});
 	
-
 
 </script>
 
@@ -16,7 +26,9 @@
 		<slot />
 		<Navigation {showNavigation} />
 	</article>
-	<UserInfo/>
+	{#if showUserInfo}
+		<UserInfo/>
+	{/if}
 </div>
 
 <style lang="scss">

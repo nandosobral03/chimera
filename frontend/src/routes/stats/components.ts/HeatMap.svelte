@@ -105,7 +105,7 @@
         if(!aggregatedBoardStats[`${i}:${j}`]) "var(--shade)"
         const percentage = Math.round(aggregatedBoardStats[`${i}:${j}`] / total_losses * 10);
         if(percentage > 5) return "white"
-        return heatmapColors[percentage]
+        return "var(--shade)"
     }
 
 </script>

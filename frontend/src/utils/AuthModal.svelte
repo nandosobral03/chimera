@@ -2,8 +2,6 @@
 	import { createEventDispatcher } from "svelte";
 	import Register from "./Register.svelte";
 	import Login from "./Login.svelte";
-    //import jose
-    
     import * as jose from 'jose'
 	import { user } from "../stores/user.store";
 
@@ -20,6 +18,7 @@
         const info = jose.decodeJwt(e.detail.token);
         user.set(info.sub);
         dispatch("close");
+        window.location.reload();
     }
 
 </script>

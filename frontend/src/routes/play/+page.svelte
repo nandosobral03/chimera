@@ -5,24 +5,25 @@
 	import { browser } from '$app/environment';
 	import { getCurrentGuestGame, postGameResultGuest } from '../../apis/guest_api';
 	import Modal from '../../utils/Modal.svelte';
+	import { getCurrentUserGame, postGameResultUser } from '../../apis/user_apis';
 	export let data: PageServerData;
 	let minesRemaining = 99;
 	let loading = true;
 	let playable = true;
 	let showModal = false;
-	let result : GameResult = {
+	let result: GameResult = {
 		won: false,
 		moves: [],
 		flags: [],
 		timeTaken: 0
-	}
+	};
 	let game: Game = {
 		board: data.board,
 		initialPosition: {
 			x: parseInt(data.initialPosition.split(':')[0]),
 			y: parseInt(data.initialPosition.split(':')[1])
 		}
-	}
+	};
 	const generateUUID = () => {
 		var d = Date.now();
 		var d2 =
@@ -41,42 +42,57 @@
 	};
 	onMount(async () => {
 		minesRemaining = data.mineCount;
-		if (browser) {
-			let guest_id = localStorage.getItem('guest_id');
-			if (!guest_id) {
-				guest_id = generateUUID();
-				localStorage.setItem('guest_id', guest_id);
-				loading = false;
-			} else {
-				let game = await getCurrentGuestGame();
-				if (game) {
-					playable = false;
-					let played_moves = game.board;
-					for (let move of played_moves.split(',')) {
-						if (move) {
-							let [x, y] = move.split(':');
-							result.moves.push({ x: parseInt(x), y: parseInt(y) });
-						}
-					}
-					for (let flag of game.flags.split(',')) {
-						if (flag) {
-							let [x, y] = flag.split(':');
-							result.flags.push({ x: parseInt(x), y: parseInt(y) });
-						}
-					}
-					result.won = game.status === 'won';
-					showModal = true;
-				}
-				minesRemaining = data.mineCount - result.flags.length;
-				loading = false;
-			}
-		}
+		await loadPlayedGame();
 	});
+
+	const loadPlayedGame = async () => {
+		let game;
+		if (browser) {
+			const token = localStorage.getItem('token');
+			if (token) {
+				game = await getCurrentUserGame();
+			} else {
+				let guest_id = localStorage.getItem('guest_id');
+				if (!guest_id) {
+					guest_id = generateUUID();
+					localStorage.setItem('guest_id', guest_id);
+					loading = false;
+				} else {
+					game = await getCurrentGuestGame();
+				}
+			}
+			if (game) {
+				playable = false;
+				let played_moves = game.board;
+				for (let move of played_moves.split(',')) {
+					if (move) {
+						let [x, y] = move.split(':');
+						result.moves.push({ x: parseInt(x), y: parseInt(y) });
+					}
+				}
+				for (let flag of game.flags.split(',')) {
+					if (flag) {
+						let [x, y] = flag.split(':');
+						result.flags.push({ x: parseInt(x), y: parseInt(y) });
+					}
+				}
+				result.won = game.status === 'won';
+				showModal = true;
+			}
+			minesRemaining = data.mineCount - result.flags.length;
+			loading = false;
+		}
+	};
 
 	const gameover = async (e: GameResult) => {
 		showModal = true;
-		if(!playable) return;
-		await postGameResultGuest(e);
+		if (!playable) return;
+		const token = localStorage.getItem('token');
+		if (token) {
+			await postGameResultUser(e);
+		} else {
+			await postGameResultGuest(e);
+		}
 	};
 </script>
 
@@ -100,13 +116,8 @@
 		</div>
 	{/if}
 
-
 	{#if showModal}
-		<Modal
-			 result={result}
-				on:close={() => showModal = false}
-			game= {game}
-		/>
+		<Modal {result} on:close={() => (showModal = false)} {game} />
 	{/if}
 </section>
 
@@ -121,7 +132,7 @@
 		align-items: center;
 	}
 
-	.board_container{
+	.board_container {
 		display: flex;
 		justify-content: center;
 		align-items: center;

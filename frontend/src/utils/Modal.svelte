@@ -87,6 +87,7 @@
         flex-direction: column;
         align-items: center;
         gap: 16px;
+        position: unset;
     }
 
 </style>

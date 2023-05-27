@@ -263,7 +263,7 @@ pub fn get_all_time_stats() -> Result<AllTimeLeaderboardResponse, MyError> {
     let connection = &mut establish_connection();
     let user_all_time_stats = {
         use crate::schema::user_stats::dsl::*;
-        let result = user_stats.order(total_games.desc()).limit(20).load::<UserStats>(connection);
+        let result = user_stats.order_by((win_streak.desc(), total_wins.desc())).limit(20).load::<UserStats>(connection);
         match result {
             Ok(stats) => stats,
             Err(_) => Vec::new()

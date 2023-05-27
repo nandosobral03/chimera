@@ -225,22 +225,25 @@ fn record_user_stats(userid: i32, won:bool) -> Result<(), MyError>{
     let mut conn = crate::database::establish_connection();
     let exists = user_stats.filter(user_id.eq(&userid)).count().get_result::<i64>(&mut conn).unwrap() != 0;
 
-    let insert_result = diesel::insert_into(crate::schema::user_stats::table)
-    .values((
-        user_id.eq(&userid),
-        total_games.eq(0),
-        total_wins.eq(0),
-        win_streak.eq(0),
-    ))
-    .execute(&mut conn);
+    if !exists {
+        let insert_result = diesel::insert_into(crate::schema::user_stats::table)
+        .values((
+            user_id.eq(&userid),
+            total_games.eq(0),
+            total_wins.eq(0),
+            win_streak.eq(0),
+        ))
+        .execute(&mut conn);
 
-    if !exists && insert_result.is_err() {
-        return Err(MyError {
-            message: String::from("Error inserting day stat"),
-            code: 400,
-        });
+        if !exists && insert_result.is_err() {
+            return Err(MyError {
+                message: String::from("Error inserting day stat"),
+                code: 400,
+            });
+        }
     }
 
+    
     let mut stats = user_stats
         .filter(user_id.eq(&userid))
         .first::<UserStats>(&mut conn)
@@ -249,31 +252,12 @@ fn record_user_stats(userid: i32, won:bool) -> Result<(), MyError>{
     if won {
         stats.total_wins += 1;
     }
-    let yesterday = (chrono::Local::now().date_naive() - chrono::Duration::days(1))
-    .format("%d/%m/%Y")
-    .to_string();
 
-   let last_win: Result<UserDayStats, _> = crate::schema::user_day_stats::table
-        .filter(crate::schema::user_day_stats::user_id.eq(&userid))
-        .filter(crate::schema::user_day_stats::status.eq("won"))
-        .order(crate::schema::user_day_stats::day.desc())
-        .first(&mut conn);
-
-
-    match diesel::update(user_stats)
+    match diesel::update(user_stats).filter(user_id.eq(&userid))
         .set((
             total_games.eq(stats.total_games),
             total_wins.eq(stats.total_wins),
-            win_streak.eq(match last_win {
-                Ok(win) => {
-                    if win.day == yesterday {
-                        stats.win_streak + (won as i32)
-                    } else {
-                        won as i32
-                    }
-                }
-                Err(_) => won as i32,
-            }),
+            win_streak.eq(if won { stats.win_streak + 1 } else { 0 })
         ))
         .execute(&mut conn)
     {
@@ -301,11 +285,17 @@ pub fn get_user_stats(userid: i32) -> Result<UserStats, MyError> {
 pub fn get_user_day_stats(userid: i32, day_param: String) -> Result<UserDayStats, MyError> {
     use crate::schema::user_day_stats::dsl::*;
     let mut conn = crate::database::establish_connection();
-    let stats = user_day_stats
+    match user_day_stats
         .filter(user_id.eq(&userid))
         .filter(day.eq(&day_param))
-        .first::<UserDayStats>(&mut conn)
-        .unwrap();
-    Ok(stats)
+        .first::<UserDayStats>(&mut conn){ 
+            Ok(stats) => Ok(stats),
+            Err(err) => {
+                return Err(MyError {
+                    message: err.to_string(),
+                    code: 404,
+                })
+            }
+        }
 }
 

@@ -28,11 +28,12 @@ pub struct UserRequest {
     pub password: String,
 }
 
-#[derive(Deserialize, Queryable, Serialize)]
+#[derive(Deserialize, Queryable, Serialize, Debug)]
+#[diesel(table_name = user_stats)]
 pub struct UserStats{
     pub user_id: i32,
+    pub win_streak: i32,
     pub total_games: i32,
     pub total_wins: i32,   
-    pub win_streak: i32,
 }
 

@@ -7,6 +7,8 @@
 	import { getDayStats } from '../../apis/day_apis';
 	import HeatMap from './components.ts/HeatMap.svelte';
 	import { getGameByDay } from '../../apis/game_apis';
+	import { browser } from '$app/environment';
+	import { getCurrentUserGame } from '../../apis/user_apis';
     
 	export let data: PageServerData;
     let today = moment(data.day, "DD/MM/YYYY").format('YYYY-MM-DD');
@@ -17,8 +19,21 @@
         stats: DayStats,
         board: Game
 ]> = new Promise((resolve, reject) => {});
+
+    const getCurrentGameStats = async () => {
+        if(!browser) return;
+        const token = localStorage.getItem('token');
+        let game;
+        if(token) {
+            game = await getCurrentUserGame();
+        }else{
+            game = await getCurrentGuestGame();
+        }
+        return game;
+    }
+
     onMount( async () => {
-        const hasPlayedToday = await getCurrentGuestGame();
+        const hasPlayedToday = await getCurrentGameStats();
         if(hasPlayedToday) {
             today = moment(data.day, "DD/MM/YYYY").add(1, 'days').format('YYYY-MM-DD');
             date = new Date(today);
@@ -65,7 +80,7 @@
         Loading
     {:then info} 
    <div style="text-align: center; margin: 24px;">
-       Winrate: { info[0].total_games == 0 ? 0 : (info[0].total_wins / info[0].total_games * 100).toFixed(2)}%
+       Pass rate: { info[0].total_games == 0 ? 0 : (info[0].total_wins / info[0].total_games * 100).toFixed(2)}%
        <div style="font-size: 0.8rem; color: var(--shade); margin-top: 8px;">
            {info[0].total_games} games played
         </div>

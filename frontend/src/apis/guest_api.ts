@@ -51,9 +51,6 @@ type GuestStats = {
     total_wins : number,
 }
 
-// type the function
-
-
 
 export let getGuestStats: () => Promise<GuestStats> = async () => {
         const url = `${PUBLIC_BACKEND_URL}/guest/stats`;
