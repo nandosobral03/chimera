@@ -1,12 +1,16 @@
 <script lang='ts'>
     export let disabled : boolean = false;
-	import { createEventDispatcher } from "svelte";
+    export let type: "standard" | "error" = "standard";
+	import { createEventDispatcher, onMount } from "svelte";
 
     const dispatch = createEventDispatcher();
 </script>
-<button on:click|stopPropagation={()=>{
+<button 
+    class={type}
+on:click|stopPropagation={()=>{
     if(!disabled)dispatch("click")
-}} {disabled}>
+}} {disabled}
+    >
     <slot/>
 </button>
 
@@ -23,6 +27,18 @@
         &:hover{
             background-color: var(--dark-accent);
             color: var(--background);
+        }
+        &:disabled{
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+
+    .error{
+        background-color: var(--danger) !important;
+        &:hover{
+            background-color: var(--danger) !important;
+            filter: brightness(1.1);
         }
     }
 

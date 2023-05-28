@@ -18,7 +18,11 @@
                 dispatch('loginToken', token);
             }, 50);
             return token;
-        });
+        }).finally(() => {
+            setTimeout(() => {
+                registerPromise = null;
+            }, 1500);
+        })
 	};
 </script>
 
@@ -38,6 +42,11 @@
 			bind:value={password}
 			class:error={password.length < 3 && passwordTouched}
 			on:blur={() => (passwordTouched = true)}
+			on:keydown={(e) => {
+				if (e.key === 'Enter') {
+					register();
+				}
+			}}
 		/>
 	</div>
 	<div style:flex-grow="1">
@@ -47,7 +56,7 @@
 			{:then token}
 				<PrimaryButton disabled>Registered!</PrimaryButton>
 			{:catch error}
-				<PrimaryButton disabled>
+				<PrimaryButton disabled type="error">
 					Error: {error.response.data.error}
 				</PrimaryButton>
 			{/await}

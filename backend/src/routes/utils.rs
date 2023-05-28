@@ -34,6 +34,7 @@ pub fn decode_token(headers: HeaderMap) -> Result<DecodedToken, MyError>{
                     if decoded_token.exp.parse::<i64>().unwrap() < chrono::Utc::now().timestamp(){
                         return Err(MyError{
                             message: String::from("Token expired"),
+                            details: Some(String::from("Please login again")),
                             code: 401
                         })
                     }
@@ -42,6 +43,7 @@ pub fn decode_token(headers: HeaderMap) -> Result<DecodedToken, MyError>{
                 Err(err) => {
                     return Err(MyError{
                         message: err.to_string(),
+                        details: Some(String::from("Invalid token")),
                         code: 401
                     })
                 }
@@ -50,6 +52,7 @@ pub fn decode_token(headers: HeaderMap) -> Result<DecodedToken, MyError>{
         None => {
             Err(MyError{
                 message: String::from("No token provided"),
+                details: Some(String::from("Please login")),
                 code: 401
             })
         },

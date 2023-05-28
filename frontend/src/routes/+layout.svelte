@@ -12,7 +12,14 @@
 		const token = localStorage.getItem("token");
 		if (token) {
 			const info = jose.decodeJwt(token);
-			user.set(info.sub);
+			const exp = new Date(info.exp! * 1000);
+			if (exp < new Date()) {
+				localStorage.removeItem("token");
+				localStorage.removeItem("guest_id");
+				user.set(undefined);
+			}else{
+				user.set(info.sub);
+			}
 		}
 		showUserInfo = true;
 	});

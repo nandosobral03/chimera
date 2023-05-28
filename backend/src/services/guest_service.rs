@@ -33,6 +33,7 @@ pub async fn save_won_game_guest(
     if guest_day_count != 0 {
         return Err(MyError {
             message: String::from("User already played this day"),
+            details: None,
             code: 409,
         });
     }
@@ -45,6 +46,7 @@ pub async fn save_won_game_guest(
         if inserted.is_err() {
             return Err(MyError {
                 message: String::from("Error inserting guest"),
+                details: None,
                 code: 400,
             });
         }
@@ -65,6 +67,7 @@ pub async fn save_won_game_guest(
     if insert_res.is_err() {
         return Err(MyError {
             message: String::from("Error inserting guest day stats"),
+            details: None,
             code: 400,
         });
     }
@@ -101,6 +104,7 @@ pub async fn save_lost_game_guest(
     if guest_day_count != 0 {
         return Err(MyError {
             message: String::from("User already played this day"),
+            details: None,
             code: 409,
         });
     }
@@ -113,6 +117,7 @@ pub async fn save_lost_game_guest(
         if inserted.is_err() {
             return Err(MyError {
                 message: String::from("Error inserting guest"),
+                details: None,
                 code: 400,
             });
         }
@@ -133,6 +138,7 @@ pub async fn save_lost_game_guest(
     if insert_res.is_err() {
         return Err(MyError {
             message: String::from("Error inserting guest day stats"),
+            details: None,
             code: 400,
         });
     }
@@ -166,6 +172,7 @@ fn record_guest_stats(guest_id_param: String, won: bool) -> Result<(), MyError> 
             if update_res.is_err() {
                 Err(MyError {
                     message: String::from("Error updating guest stats"),
+                    details: None,
                     code: 400,
                 })
             } else {
@@ -174,6 +181,7 @@ fn record_guest_stats(guest_id_param: String, won: bool) -> Result<(), MyError> 
         }
         Err(_) => Err(MyError {
             message: String::from("Error getting guest stats"),
+            details: None,
             code: 400,
         }),
     }
@@ -190,6 +198,7 @@ pub fn get_guest_stats(param_guest_id: String) -> Result<Guest, MyError> {
         Ok(guest) => Ok(guest),
         Err(_) => Err(MyError {
             message: String::from("Error getting guest stats"),
+            details: None,
             code: 400,
         }),
     }
@@ -214,12 +223,14 @@ pub fn get_guest_day_stats(param_guest_id: String, param_day: String) -> Result<
                 Ok(guest_day) => Ok(guest_day),
                 Err(_) => Err(MyError {
                     message: String::from("Error getting guest day stats"),
+                    details: None,
                     code: 400,
                 }),
             }
         }
         Err(_) => Err(MyError {
             message: String::from("Guest not found"),
+            details: None,
             code: 404,
         }),
     }

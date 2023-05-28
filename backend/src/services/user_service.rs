@@ -39,10 +39,22 @@ pub fn sign_up(user: UserRequest) -> Result<Token, MyError> {
                     generate_token(user.username,new_user_id)
                 },
                 Err(err) => {
-                    return Err(MyError {
-                        message: err.to_string(),
-                        code: 400,
-                    })
+                    match err {
+                        diesel::result::Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation,_) => {
+                            return Err(MyError {
+                                message: String::from("Username already exists"),
+                                details: None,
+                                code: 409,
+                            })
+                        },
+                        _ => {
+                            return Err(MyError {
+                                message: String::from("Error inserting user"),
+                                details: None,                                
+                                code: 400,
+                            })
+                        }
+                    }
                 }
             }
 
@@ -50,7 +62,8 @@ pub fn sign_up(user: UserRequest) -> Result<Token, MyError> {
         }
         Err(err) => {
             return Err(MyError {
-                message: err.to_string(),
+                message: String::from("Error hashing password"),
+                details: Some(err.to_string()),
                 code: 400,
             })
         }
@@ -69,35 +82,28 @@ pub fn login(user: UserRequest) -> Result<Token, MyError> {
             match new_hash {
                 Ok(hash) => {
                     if hash.format_for_version(bcrypt::Version::TwoB) == u.password_hash {
-                        let token = generate_token(user.username, u.id);
-                        match token {
-                            Ok(token) => {
-                                return Ok(token);
-                            }
-                            Err(err) => {
-                                return Err(MyError {
-                                    message: err.message,
-                                    code: 400,
-                                })
-                            }
-                        }
+                        let token = generate_token(user.username, u.id)?;
+                        return Ok(token);
                     } else {
                         return Err(MyError {
                             message: String::from("Invalid password"),
+                            details: None,
                             code: 401,
                         });
                     }
                 }
                 Err(err) => {
                     return Err(MyError {
-                        message: err.to_string(),
+                        message: String::from("Error hashing password"),
+                        details: Some(err.to_string()),
                         code: 400,
                     })
                 }
             }
         }
         Err(err) => Err(MyError {
-            message: err.to_string(),
+            message: String::from("Invalid username"),
+            details: Some(err.to_string()),
             code: 400,
         }),
     }
@@ -141,6 +147,7 @@ pub async fn save_won_game(
     if user_day_count != 0 {
         return Err(MyError {
             message: String::from("User already played this day"),
+            details: None,
             code: 409,
         });
     } else {
@@ -163,7 +170,8 @@ pub async fn save_won_game(
             }
             Err(err) => {
                 return Err(MyError {
-                    message: err.to_string(),
+                    message: String::from("Error inserting user day stats"),
+                    details: Some(err.to_string()),
                     code: 400,
                 })
             }
@@ -190,6 +198,7 @@ pub async fn save_lost_game(
     if user_day_count != 0 {
         return Err(MyError {
             message: String::from("User already played this day"),
+            details: None,
             code: 409,
         });
     } else {
@@ -212,6 +221,7 @@ pub async fn save_lost_game(
             Err(err) => {
                 return Err(MyError {
                     message: err.to_string(),
+                    details: None,
                     code: 400,
                 })
             }
@@ -238,6 +248,7 @@ fn record_user_stats(userid: i32, won:bool) -> Result<(), MyError>{
         if !exists && insert_result.is_err() {
             return Err(MyError {
                 message: String::from("Error inserting day stat"),
+                details: Some(insert_result.unwrap_err().to_string()),
                 code: 400,
             });
         }
@@ -265,6 +276,7 @@ fn record_user_stats(userid: i32, won:bool) -> Result<(), MyError>{
         Err(err) => {
             return Err(MyError {
                 message: err.to_string(),
+                details: None,
                 code: 400,
             })
         }
@@ -293,6 +305,7 @@ pub fn get_user_day_stats(userid: i32, day_param: String) -> Result<UserDayStats
             Err(err) => {
                 return Err(MyError {
                     message: err.to_string(),
+                    details: None,
                     code: 404,
                 })
             }

@@ -18,7 +18,7 @@
         }).finally(() => {
             setTimeout(() => {
                 loginPromise = null;
-            }, 750);
+            }, 1500);
         })
     };
 </script>
@@ -27,7 +27,11 @@
 <div class="container">
 	<div>
 		<input type="text" placeholder="Username" bind:value={username} />
-		<input type="password" placeholder="Password" bind:value={password} />
+		<input type="password" placeholder="Password" bind:value={password}  on:keyup={(e) => {
+			if (e.key === 'Enter') {
+				handleLogin();
+			}
+		}}/>
 	</div>
 	<div style:flex-grow="1">
         {#if loginPromise}
@@ -36,7 +40,7 @@
             {:then _} 
                 <PrimaryButton disabled>Logged In!</PrimaryButton>
             {:catch error}
-                <PrimaryButton disabled>
+                <PrimaryButton disabled type="error">
                     Error: {error.response.data.error}
                 </PrimaryButton>
             {/await}

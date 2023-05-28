@@ -14,6 +14,7 @@ pub fn get_game_by_day(day_to_find: &str) -> Result<Game, MyError> {
         Ok(game) => Ok(game),
         Err(_) => Err(MyError{
             message: String::from("Game not found"),
+            details: None,
             code: 404
         })
     }
@@ -28,6 +29,7 @@ fn validate_day(day_to_find: &str) -> Result<(), MyError> {
     if parts.len() != 3 {
         return Err(MyError{
             message: String::from("Invalid date. Please use the format dd/mm/yyyy"),
+            details: None,
             code: 400
         });
     }
@@ -39,6 +41,7 @@ fn validate_day(day_to_find: &str) -> Result<(), MyError> {
         return Err(
             MyError {
                 message: String::from("Invalid day. Please use a day between 1 and 31"),
+                details: None,
                 code: 400
             }
         );
@@ -48,6 +51,7 @@ fn validate_day(day_to_find: &str) -> Result<(), MyError> {
         return Err(
             MyError {
                 message: String::from("Invalid month. Please use a month between 1 and 12"),
+                details: None,
                 code: 400
             }
         );
@@ -57,6 +61,7 @@ fn validate_day(day_to_find: &str) -> Result<(), MyError> {
         return Err(
             MyError {
                 message: String::from("Invalid year. Please use a year between 2022 and 2025"),
+                details: None,
                 code: 400
             }
         );
@@ -87,6 +92,7 @@ pub fn record_stats(result_day: String, won: bool, last_move_played: Option<Stri
     if !exists && insert_result.is_err() {
         return Err(MyError {
             message: String::from("Error inserting day stat"),
+            details: None,
             code: 400,
         });
     }
@@ -109,7 +115,8 @@ pub fn record_stats(result_day: String, won: bool, last_move_played: Option<Stri
         }) {
             Ok(_) => Ok(()),
             Err(err) => Err(MyError {
-                message: err.to_string(),
+                message: String::from("Error recording stats"),
+                details: Some(err.to_string()),
                 code: 400,
             }),
         }
@@ -118,6 +125,7 @@ pub fn record_stats(result_day: String, won: bool, last_move_played: Option<Stri
             None => {
                 return Err(MyError {
                     message: String::from("Last move played is required in losing games"),
+                    details: None,
                     code: 400,
                 })
             },
@@ -144,7 +152,8 @@ pub fn record_stats(result_day: String, won: bool, last_move_played: Option<Stri
                 }) {
                     Ok(_) => Ok(()),
                     Err(err) => Err(MyError {
-                        message: err.to_string(),
+                        message: String::from("Error recording stats"),
+                        details: Some(err.to_string()),
                         code: 400,
                     }),
                 }
@@ -173,6 +182,7 @@ pub fn get_day_stats(day_to_find: &str) -> Result<DayStateResponse, MyError> {
         ),
         Err(_) => Err(MyError{
             message: String::from("Day stat not found"),
+            details: None,
             code: 404
         })
     }
@@ -192,6 +202,7 @@ pub fn validate_game_result(result: &GameResult)-> Result<(), MyError>{
     if uncovered.is_err() {
         return Err(MyError{
             message: String::from("Invalid cell. Please use the format x:y"),
+            details: None,
             code: 400
         })
     }
@@ -207,6 +218,7 @@ pub fn validate_game_result(result: &GameResult)-> Result<(), MyError>{
     if flags.is_err() {
         return Err(MyError{
             message: String::from("Invalid cell. Please use the format x:y"),
+            details: None,
             code: 400
         })
     }
@@ -252,6 +264,7 @@ pub fn get_day_leaderboards(day_to_find: &str) -> Result<DayLeaderboardResponse,
         },
         Err(_) => Err(MyError{
                 message: String::from("Day stat not found"),
+                details: None,
                 code: 404
             })
     }
@@ -315,6 +328,7 @@ fn validate_cell(cell: &str) -> Result<(), MyError> {
     if parts.len() != 2 {
         return Err(MyError{
             message: String::from("Invalid cell. Please use the format x:y"),
+            details: None,
             code: 400
         })
     }
@@ -325,6 +339,7 @@ fn validate_cell(cell: &str) -> Result<(), MyError> {
     if x < 0 || x > 15 {
         return Err(MyError{
             message: String::from("Invalid cell value. Please use a value between 0 and 15 for x"),
+            details: None,
             code: 400
         })
     }
@@ -332,6 +347,7 @@ fn validate_cell(cell: &str) -> Result<(), MyError> {
     if y < 0 || y > 29 {
         return Err(MyError{
             message: String::from("Invalid cell value. Please use a value between 0 and 29 for y"),
+            details: None,
             code: 400
         })
     }
