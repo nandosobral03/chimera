@@ -3,10 +3,11 @@
 	import UserInfo from "../utils/UserInfo.svelte";
 	import * as jose from "jose";
 	import { user } from "../stores/user.store";
-	import { onMount } from "svelte";
+	import { onMount, tick } from "svelte";
 	import { browser } from "$app/environment";
 	let showNavigation = false;
 	let showUserInfo = false;
+	let componentReference: any
 	onMount(() => {
 		if(!browser) return;
 		const token = localStorage.getItem("token");
@@ -23,11 +24,12 @@
 		}
 		showUserInfo = true;
 	});
+
 	
 
 </script>
 
-<div class="container">
+<div class="container" bind:this={componentReference}>
 	<button class="close" on:click={() => showNavigation=!showNavigation}>&#9776;</button>
 	<article class="content">
 		<slot />

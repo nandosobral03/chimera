@@ -43,7 +43,6 @@
     })  
 
     const loadDayInfo = async () => {
-        console.log('loading day info')
             infoPromise = Promise.all([getDayStats(moment(date).format('DD/MM/YYYY')), getGameByDay(moment(date).format('DD/MM/YYYY'))]).catch(e =>{
                     infoPromise = new Promise( async (resolve, reject) => {
                     const game =  await getGameByDay(moment(date).format('DD/MM/YYYY'))

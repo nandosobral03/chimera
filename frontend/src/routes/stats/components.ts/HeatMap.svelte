@@ -40,7 +40,6 @@
 	const calculateCellSize = () => {
 		windowSize = { width: window.innerWidth, height: window.innerHeight };
 		verticalDisplay = windowSize.width < windowSize.height;
-		console.log('calculating cell size', verticalDisplay, windowSize);
 		cellSize = getCellSize(verticalDisplay);
 	};
 
@@ -96,7 +95,6 @@
     const getBombColor =   (i: number, j: number) => {
         if(!aggregatedBoardStats[`${i}:${j}`]) return heatmapColors[0]
         const percentage = Math.floor(aggregatedBoardStats[`${i}:${j}`] / total_losses * 10) - 1;
-        console.log(percentage)
         return heatmapColors[percentage]
     }
 

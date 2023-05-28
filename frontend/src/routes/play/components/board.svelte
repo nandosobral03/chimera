@@ -43,7 +43,6 @@
 	const calculateCellSize = () => {
 		windowSize = { width: window.innerWidth, height: window.innerHeight };
 		verticalDisplay = windowSize.width < windowSize.height;
-		console.log('calculating cell size', verticalDisplay, windowSize);
 		cellSize = getCellSize(verticalDisplay);
 	};
 

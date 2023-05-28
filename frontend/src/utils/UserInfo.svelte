@@ -1,15 +1,17 @@
 <script lang='ts'>
     import {user} from "../stores/user.store";
 	import AuthModal from "./AuthModal.svelte";
-    let showLogin = false;
+    import loginStore from "../stores/login.store";
     const openLogin = () => {
-        showLogin = true;
+        loginStore.set({
+            isOpen: true,
+            allowClose: true,
+        })
     }   
 
     
     const logout = () => {
         localStorage.removeItem('token');
-        localStorage.removeItem('guest_id');
         user.set(undefined);
         if(window.location.pathname == "/profile") window.location.href = "/play";
         else window.location.reload();
@@ -36,8 +38,8 @@
         </div>
     {/if}
 </div>
-{#if showLogin}
-    <AuthModal  on:close={() => showLogin = false}/>
+{#if $loginStore?.isOpen}
+    <AuthModal  on:close={() => loginStore.set({isOpen: false, allowClose: false})} />
 {/if}
 
 <style lang='scss'>

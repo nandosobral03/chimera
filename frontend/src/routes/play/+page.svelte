@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import type { PageServerData } from './$types';
 	import Board from './components/board.svelte';
 	import { browser } from '$app/environment';
 	import { getCurrentGuestGame, postGameResultGuest } from '../../apis/guest_api';
 	import Modal from '../../utils/Modal.svelte';
 	import { getCurrentUserGame, postGameResultUser } from '../../apis/user_apis';
+	import FirstTime from './components/FirstTime.svelte';
 	export let data: PageServerData;
+	const dispatch = createEventDispatcher();
 	let minesRemaining = 99;
+	let firstTime = false;
 	let loading = true;
 	let playable = true;
 	let showModal = false;
@@ -42,8 +45,19 @@
 	};
 	onMount(async () => {
 		minesRemaining = data.mineCount;
-		await loadPlayedGame();
+		firstTime = checkFirstTime();
+		if(!firstTime) {
+			await loadPlayedGame();
+		}
 	});
+
+	const checkFirstTime = () => {
+		let guest_id = localStorage.getItem('guest_id');
+		let token = localStorage.getItem('token');
+		return !guest_id && !token;
+	};
+
+
 
 	const loadPlayedGame = async () => {
 		let game;
@@ -120,7 +134,12 @@
 		<Modal {result} on:close={() => (showModal = false)} {game} />
 	{/if}
 </section>
-
+{#if firstTime}
+	<FirstTime on:guest={async () => {
+		firstTime = false;
+		await loadPlayedGame()
+	}} on:login={() => dispatch('login')} />
+{/if}
 <style lang="scss">
 	section {
 		height: 100%;

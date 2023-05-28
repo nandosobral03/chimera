@@ -3,7 +3,6 @@
 	import AlltimeLeaderBoard from "./components/AlltimeLeaderBoard.svelte";
 	import DailyLeaderBoard from "./components/DailyLeaderBoard.svelte";
     export let data: PageServerData;
-    console.log(data);
     let active: "leaderboard" | "daily" = "daily";
 
 
