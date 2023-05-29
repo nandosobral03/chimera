@@ -4,7 +4,6 @@
     import 'chart.js/auto';
     import {Pie} from "svelte-chartjs";
 	import { getUserStats } from "../apis/user_apis";
-    export let height = 300;
     export let width = 400;
 
 

@@ -2,9 +2,10 @@
 
 </script>
 <section>
-    <div>
-        board
-    </div>
+    <img src="./favicon.png" alt="logo" height="40%">
+    <h1>
+        Chimera
+    </h1>
 </section>
 
 <style lang='scss'>
@@ -15,5 +16,12 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
+    }
+    h1{
+        font-size: 3rem;
+        font-weight: 700;
+        margin-top: 1rem;
+        text-transform: uppercase;
+        color: var(--shade);
     }
 </style>

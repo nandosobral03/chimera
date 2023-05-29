@@ -24,7 +24,7 @@
 <section style={showNavigation ? 'opacity: 1; pointer-events: all;' : 'opacity: 0; pointer-events: none;'}>
     <div class="routes">
         {#each routes as route}
-                <a on:click={() => window.location.href = route.path}>
+                <a href={route.path} on:click={() => showNavigation = false}>
                     {route.name}
                 </a>
         {/each}
@@ -80,6 +80,7 @@
         color: var(--background);
         text-transform: uppercase;
         cursor: pointer;
+        text-decoration: none;
         &:hover{
             text-decoration: underline;
         }
