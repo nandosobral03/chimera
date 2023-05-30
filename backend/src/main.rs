@@ -3,6 +3,7 @@ use axum::{
     Router,
 };
 
+use dotenvy::dotenv;
 use tower_http::cors::{CorsLayer};
 
 mod routes;
@@ -36,8 +37,10 @@ async fn main() {
         .layer(CorsLayer::permissive());
 
     // run it with hyper on localhost:3000
-    println!("Listening on port 3000");
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+    dotenv().ok();
+    let port = std::env::var("PORT").unwrap();
+    println!("Listening on port {}", port);
+    axum::Server::bind(&format!("0.0.0.0:{}", port).parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
